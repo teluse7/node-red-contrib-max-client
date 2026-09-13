@@ -1,11 +1,11 @@
 {
     "name": "node-red-contrib-max-client",
-    "version": "0.1.0",
+    "version": "1.0.9",
     "description": "Sends a message to the messenger MAX via the MAX-bot",
-    "main": "max-send.js",  
+    "main": "max-send.js",
     "scripts": {
         "test": "echo \"без тестов\" && exit 0"
-    }, 
+    },
     "keywords": [
         "node-red",
         "MAX",
