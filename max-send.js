@@ -71,14 +71,16 @@ module.exports = function (RED) {
                         })
                     })
                         .then(response => 
-                            fillColor ?? response.ok
+                            fillColor ?? (response.ok
                                 ? node.status({ fill: "green", shape: "dot", text: RED._('max-send.status.send') + userid })
-                                : node.status({ fill: "red", shape: "ring", text: 'max-send.status.' + response.status })   
+                                : node.status({ fill: "red", shape: "ring", text: 'max-send.status.' + response.status })
+                            )   
                         )                           
                         .catch (error => 
-                            fillColor ?? error.message == 'fetch failed'           
+                            fillColor ?? (error.message == 'fetch failed'           
                                 ? node.status({ fill: "red", shape: "ring", text: RED._('max-send.status.error') + url })
                                 : node.status({ fill: "red", shape: "ring", text: error.message })
+                            )
                         )
                 );
 
