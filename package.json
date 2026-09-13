@@ -3,6 +3,11 @@
     "version": "1.0.11",
     "description": "Sends a message to the messenger MAX via the MAX-bot",
     "main": "max-send.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/teluse7/node-red-contrib-max-client"
+    },
+    "author": "teluse7",
     "scripts": {
         "test": "echo \"без тестов\" && exit 0"
     },
