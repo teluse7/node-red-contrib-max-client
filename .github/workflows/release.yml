@@ -76,3 +76,30 @@ jobs:
 
       - name: Publish to npm
         run: npx npm@latest publish --provenance --access public
+
+      - name: Update flows.nodered.org catalogue
+        run: |
+          MODULE_NAME="node-red-contrib-max-client"
+
+          # Получаем CSRF-токен и сохраняем куки
+          curl -s -c /tmp/cookies.txt \
+            "https://flows.nodered.org/add/node" > /tmp/page.html
+
+          # Извлекаем токен из HTML
+          CSRF_TOKEN=$(grep -oP '_csrf.*?value="[^"]*"' /tmp/page.html | \
+            grep -oP 'value="[^"]*"' | grep -oP '[^"]+' | tail -1)
+
+          if [ -z "$CSRF_TOKEN" ]; then
+            echo "CSRF token not found, skipping"
+            exit 0
+          fi
+
+          # Отправляем запрос на обновление
+          curl -s -b /tmp/cookies.txt \
+            -X POST "https://flows.nodered.org/add/node" \
+            -H "referer: https://flows.nodered.org/add/node" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "x-requested-with: XMLHttpRequest" \
+            -d "_csrf=${CSRF_TOKEN}&module=${MODULE_NAME}"
+
+          echo "Catalogue update requested for ${MODULE_NAME}"
