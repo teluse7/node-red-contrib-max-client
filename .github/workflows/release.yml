@@ -58,6 +58,11 @@ jobs:
             echo "Pushed updated package.json."
           fi
 
+      - name: Ensure npm supports OIDC
+        run: |
+          npm install -g npm@^11.5.1
+          npm --version
+
       - name: Install dependencies
         run: npm install
 
@@ -70,4 +75,4 @@ jobs:
           prerelease: false
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: npx npm@latest publish --provenance --access public
