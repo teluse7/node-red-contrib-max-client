@@ -1,33 +1,76 @@
-name: Release
+name: Release Node-RED Node (Web-Only Auto-Bump)
 
 on:
   release:
     types: [published]
 
+concurrency:
+  group: publish-\${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write  # Важно: нужно право на запись в репозиторий для коммита
+  id-token: write  # Обязательно для Trusted Publishing (OIDC)
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Нужен полный граф истории для корректного коммита
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org
-
-      - name: Set version from tag
-        run: |
-          TAG_VERSION=${GITHUB_REF_NAME#v}
-          echo "Версия из тега: $TAG_VERSION"
-          npm version "$TAG_VERSION" --no-git-tag-version --allow-same-version
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Extract and Set Version from Release Tag
+        id: set-version
+        run: |
+          TAG_NAME=\${{ github.event.release.tag_name }}
+          
+          # Удаляем префикс 'v', если он есть
+          VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
+          
+          echo "🏷️ Publishing version: \$VERSION"
+          
+          # Обновляем package.json локально (без создания git-тега)
+          npm version "\$VERSION" --no-git-tag-version --allow-same-version
+          
+          # Проверка
+          CURRENT=\$(node -p "require('./package.json').version")
+          echo "✅ Verified version in package.json: \$CURRENT"
 
       - name: Publish to npm
         run: npm publish --provenance --access public
+        # Если пакет приватный (scoped), замените на --access restricted
+
+      - name: Commit and Push Updated package.json
+        # Этот шаг гарантирует, что версия обновится и в репозитории на GitHub
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Добавляем только измененный файл
+          git add package.json
+          
+          # Делаем коммит. Если изменений нет (редкий случай), просто выводим сообщение
+          if git diff --staged --quiet; then
+            echo "No changes to commit (package.json version already matches)."
+          else
+            git commit -m "chore: bump version to \${{ github.event.release.tag_name }}"
+            git push
+            echo "✅ Successfully pushed updated package.json to repository."
+          fi
+
+      - name: Success Notification
+        if: success()
+        run: echo "🎉 Release complete: version \${{ github.event.release.tag_name }} published to npm and repo."
