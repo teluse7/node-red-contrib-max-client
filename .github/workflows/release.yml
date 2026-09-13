@@ -47,7 +47,7 @@ jobs:
           
           # Проверка
           CURRENT=$(node -p "require('./package.json').version")
-          echo "✅ Verified version in package.json: $CURRENT"
+          echo "Verified version in package.json: $CURRENT"
 
       - name: Publish to npm
         run: npm publish --provenance --access public
@@ -68,9 +68,9 @@ jobs:
           else
             git commit -m "chore: bump version to ${{ github.event.release.tag_name }}"
             git push
-            echo "✅ Successfully pushed updated package.json to repository."
+            echo "Successfully pushed updated package.json to repository."
           fi
 
       - name: Success Notification
-        if: success()
-        run: echo "🎉 Release complete: version ${{ github.event.release.tag_name }} published to npm and repo."
+        if: ${{ success() }}
+        run: echo "Release complete: version ${{ github.event.release.tag_name }} published to npm and repo."
