@@ -5,7 +5,7 @@ on:
     types: [published]
 
 concurrency:
-  group: publish-\${{ github.ref }}
+  group: publish-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -35,19 +35,19 @@ jobs:
       - name: Extract and Set Version from Release Tag
         id: set-version
         run: |
-          TAG_NAME=\${{ github.event.release.tag_name }}
+          TAG_NAME=${{ github.event.release.tag_name }}
           
           # Удаляем префикс 'v', если он есть
           VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
           
-          echo "🏷️ Publishing version: \$VERSION"
+          echo "Publishing version: $VERSION"
           
           # Обновляем package.json локально (без создания git-тега)
-          npm version "\$VERSION" --no-git-tag-version --allow-same-version
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
           
           # Проверка
-          CURRENT=\$(node -p "require('./package.json').version")
-          echo "✅ Verified version in package.json: \$CURRENT"
+          CURRENT=$(node -p "require('./package.json').version")
+          echo "✅ Verified version in package.json: $CURRENT"
 
       - name: Publish to npm
         run: npm publish --provenance --access public
@@ -66,11 +66,11 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit (package.json version already matches)."
           else
-            git commit -m "chore: bump version to \${{ github.event.release.tag_name }}"
+            git commit -m "chore: bump version to ${{ github.event.release.tag_name }}"
             git push
             echo "✅ Successfully pushed updated package.json to repository."
           fi
 
       - name: Success Notification
         if: success()
-        run: echo "🎉 Release complete: version \${{ github.event.release.tag_name }} published to npm and repo."
+        run: echo "🎉 Release complete: version ${{ github.event.release.tag_name }} published to npm and repo."
