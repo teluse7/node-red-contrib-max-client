@@ -16,12 +16,19 @@ Usage
 -----
 
 The node send a message from `msg.payload` to the messenger MAX at the `Phone` number with the `Token` access key via the MAX-bot at the `URL` address.
-If the message contains a web link, a screenshot of the specified page will be sent to the messenger.
+If the message contains web links, then if the `Render` checkbox is checked, screenshots of the specified pages will be sent to the messenger.
+Some pages, especially those included with Dashboard 2.0 for Node-RED, require additional loading control (Canvas control). To do this, check the `Control` checkbox.
+For the ArmV7 platform, you need to install the external `teluse7/puppeteer-armv7` service in the container and specify its address and port in the `Service`.
+When setting up the container, specify internal port 3000 and the TZ variable (default: Europe/Moscow), and set the RAM limit to 2,560,000,000 and the CPU limit to 30.
+
 
 ### Input
 
 Specify the URL, phone number and access key in the `URL`, `Phone` and `Token`.
 Place the text of message in the `msg.payload`.
+Check the `Render` checkbox to send screenshots.
+Check the `Control` checkbox if the page requires additional loading control.
+If the node is running on the ArmV7 platform, additionally specify the screenshot service address and port in the `Service`.
 
 ### Output
 
