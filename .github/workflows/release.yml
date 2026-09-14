@@ -77,6 +77,9 @@ jobs:
       - name: Publish to npm
         run: npx npm@latest publish --provenance --access public
 
+      - name: Wait for npm to propagate
+        run: sleep 60
+      
       - name: Update flows.nodered.org catalogue
         run: |
           MODULE_NAME="node-red-contrib-max-client"
@@ -94,6 +97,11 @@ jobs:
             exit 0
           fi
 
+          # Проверяем, что в npm уже нужная версия
+          NPM_VERSION=$(curl -s "https://registry.npmjs.org/${MODULE_NAME}/latest" | \
+            grep -oP '"version":"[^"]*"' | sed 's/"version":"//;s/"//')
+          echo "npm latest version: $NPM_VERSION"
+          
           # Отправляем запрос на обновление
           curl -s -b /tmp/cookies.txt \
             -X POST "https://flows.nodered.org/add/node" \
