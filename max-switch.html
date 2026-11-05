@@ -1,0 +1,85 @@
+<script type="text/javascript">
+    RED.nodes.registerType("max-switch", {
+        category: "MAX",
+        color: "#90cce4",
+        icon: "switch.svg",
+        defaults: {
+            name: { value: "" },
+            targetPanel: { type: "max-panel", required: true }
+        },
+        inputs: 1,
+        outputs: 0,
+        label: function () {
+            return this.name || (this.targetPanel ? RED.nodes.nodeName(this.targetPanel) : "max-switch");
+        },
+        labelStyle: function () { return this.name ? "" : "node_label_italic"; },
+        oneditprepare: function () {
+            var _ = this._;
+
+            $("#node-input-targetPanel").off("change").on("change", function () {
+                var panelVal = $(this).val();
+                if (!panelVal || panelVal === "_ADD_") {
+                    $(this).addClass("input-error");
+                    $("#max-switch-panel-hint").text(_("max-switch.validate.targetPanelEmptyHint")).show();
+                } else {
+                    $(this).removeClass("input-error");
+                    $("#max-switch-panel-hint").hide();
+                }
+            });
+
+            // ── Capture-phase click on save button ──
+            var okBtn = document.getElementById("node-dialog-ok");
+            if (okBtn && window._maxSwitchOkHandler) {
+                okBtn.removeEventListener("click", window._maxSwitchOkHandler, true);
+            }
+            if (okBtn) {
+                window._maxSwitchOkHandler = function (e) {
+                    var valid = true;
+
+                    var panelVal = $("#node-input-targetPanel").val();
+                    if (!panelVal || panelVal === "_ADD_") {
+                        $("#node-input-targetPanel").addClass("input-error");
+                        valid = false;
+                    }
+
+                    if (!valid) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        RED.notify(_("max-switch.validate.checkFields"), "error");
+                    }
+                };
+                okBtn.addEventListener("click", window._maxSwitchOkHandler, true);
+            }
+        },
+        oneditvalidate: function () {
+            try {
+                var panelVal = $("#node-input-targetPanel").val();
+                if (!panelVal || panelVal === "_ADD_") { return false; }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="max-switch">
+    <div class="form-row">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i> <span data-i18n="max-switch.label.name"></span>
+        </label>
+        <input type="text" id="node-input-name"
+               data-i18n="[placeholder]max-switch.placeholder.name"
+               style="width: 70%;">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-targetPanel">
+            <i class="fa fa-arrows-alt"></i> <span data-i18n="max-switch.label.targetPanel"></span>
+        </label>
+        <input type="text" id="node-input-targetPanel" style="width: 70%;">
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-switch-panel-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+</script>

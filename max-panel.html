@@ -1,0 +1,201 @@
+<script type="text/javascript">
+    RED.nodes.registerType("max-panel", {
+        category: "config",
+        defaults: {
+            name: { value: "" },
+            config: { type: "max-ws-config", required: true },
+            panelName: {
+                value: "\u041f\u0430\u043d\u0435\u043b\u044c \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",
+                required: true,
+                validate: function (v) {
+                    if (!v || !v.trim()) { return false; }
+                    var myId = this.id;
+                    var myConfig = this.config;
+                    var found = false;
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.type === "max-panel" && n.id !== myId && n.config === myConfig && n.panelName === v) found = true
+                    });
+                    return !found
+                }
+            },
+            isActiveByDefault: { value: false }
+        },
+        label: function () {
+            return this.name || this.panelName || "max-panel"
+        },
+        oneditprepare: function () {
+            var editingId = this.id;
+            var _ = this._;
+
+            // Real-time highlight: config
+            $("#node-config-input-config").off("change").on("change", function () {
+                var configVal = $(this).val();
+                if (!configVal || configVal === "_ADD_") {
+                    $(this).addClass("input-error");
+                    $("#max-panel-config-hint").text(_("max-panel.validate.configNotSelectedHint")).show()
+                } else {
+                    $(this).removeClass("input-error");
+                    $("#max-panel-config-hint").hide()
+                }
+            });
+
+            // Real-time highlight: panelName
+            $("#node-config-input-panelName").off("input").on("input", function () {
+                var panelNameVal = $(this).val().trim();
+                if (!panelNameVal) {
+                    $(this).addClass("input-error");
+                    $("#max-panel-name-hint").text(_("max-panel.validate.panelNameEmptyHint")).show()
+                } else {
+                    var configId = $("#node-config-input-config").val();
+                    var found = false;
+                    var conflictName = "";
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.type === "max-panel" && n.id !== editingId && n.config === configId && n.panelName === panelNameVal) {
+                            found = true;
+                            conflictName = n.name || n.panelName
+                        }
+                    });
+                    if (found) {
+                        $(this).addClass("input-error");
+                        $("#max-panel-name-hint").text(_("max-panel.validate.duplicatePanelNameHint") + " " + conflictName).show()
+                    } else {
+                        $(this).removeClass("input-error");
+                        $("#max-panel-name-hint").hide()
+                    }
+                }
+            });
+
+            // isActiveByDefault checkbox logic
+            $("#node-config-input-isActiveByDefault").off("change").on("change", function () {
+                var isActive = $(this).prop("checked");
+                if (!isActive) return;
+
+                var configId = $("#node-config-input-config").val();
+                if (!configId || configId === "_ADD_") {
+                    $(this).prop("checked", false);
+                    RED.notify(_("max-panel.validate.configNotSelected"), "error");
+                    return
+                }
+
+                // Check for conflict
+                var otherActive = null;
+                RED.nodes.eachConfig(function (n) {
+                    if (n.type === "max-panel" && n.id !== editingId && n.config === configId && n.isActiveByDefault) otherActive = n
+                });
+
+                if (otherActive) {
+                    $(this).prop("checked", false);
+                    RED.notify(_("max-panel.validate.activeConflict") + " '" + (otherActive.name || otherActive.panelName) + "'", "error")
+                }
+            });
+
+            // ── Capture-phase click on save button ──
+            var okBtn = document.getElementById("node-config-dialog-ok");
+            if (okBtn && window._maxPanelOkHandler) okBtn.removeEventListener("click", window._maxPanelOkHandler, true);
+            if (okBtn) {
+                window._maxPanelOkHandler = function (e) {
+                    var valid = true;
+
+                    // config
+                    var configVal = $("#node-config-input-config").val();
+                    if (!configVal || configVal === "_ADD_") {
+                        $("#node-config-input-config").addClass("input-error");
+                        valid = false
+                    }
+
+                    // panelName
+                    var panelNameVal = $("#node-config-input-panelName").val().trim();
+                    if (!panelNameVal) {
+                        $("#node-config-input-panelName").addClass("input-error");
+                        valid = false
+                    } else {
+                        var found = false;
+                        RED.nodes.eachConfig(function (n) {
+                            if (n.type === "max-panel" && n.id !== editingId && n.config === configVal && n.panelName === panelNameVal) found = true
+                        });
+                        if (found) {
+                            $("#node-config-input-panelName").addClass("input-error");
+                            valid = false
+                        }
+                    }
+
+                    if (!valid) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        RED.notify(_("max-panel.validate.checkFields"), "error")
+                    }
+                }
+                okBtn.addEventListener("click", window._maxPanelOkHandler, true)
+            }
+        },
+        oneditvalidate: function () {
+            try {
+                var editingId = this.id;
+                var valid = true;
+
+                var configVal = $("#node-config-input-config").val();
+                if (!configVal || configVal === "_ADD_") valid = false; 
+
+                var panelNameVal = $("#node-config-input-panelName").val().trim();
+                if (!panelNameVal) valid = false
+                else {
+                    var found = false;
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.type === "max-panel" && n.id !== editingId && n.config === configVal && n.panelName === panelNameVal) found = true
+                    });
+                    if (found) valid = false
+                }
+
+                return valid
+            } catch (e) {
+                return false
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="max-panel">
+    <div class="form-row">
+        <label for="node-config-input-name">
+            <i class="fa fa-tag"></i> <span data-i18n="max-panel.label.name"></span>
+        </label>
+        <input type="text" id="node-config-input-name"
+               data-i18n="[placeholder]max-panel.placeholder.name"
+               style="width: 70%;">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-config">
+            <i class="fa fa-server"></i> <span data-i18n="max-panel.label.config"></span>
+        </label>
+        <input type="text" id="node-config-input-config" style="width: 70%;">
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-panel-config-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-panelName">
+            <i class="fa fa-th-large"></i> <span data-i18n="max-panel.label.panelName"></span>
+        </label>
+        <input type="text" id="node-config-input-panelName"
+               data-i18n="[placeholder]max-panel.placeholder.panelName"
+               style="width: 70%;">
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-panel-name-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label style="width: auto;">
+            <input type="checkbox" id="node-config-input-isActiveByDefault" style="width: auto; margin-top: -2px;">
+            <span data-i18n="max-panel.label.isActiveByDefault"></span>
+        </label>
+        <div style="font-size:11px;color:#888;margin-top:4px;" data-i18n="max-panel.tip.isActiveByDefault"></div>
+    </div>
+
+    <div class="form-tips" style="width: 89%;">
+        <span data-i18n="[html]max-panel.tip.config"></span><br>
+        <span data-i18n="[html]max-panel.tip.panel"></span><br>
+    </div>
+</script>

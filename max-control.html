@@ -1,0 +1,220 @@
+<script type="text/javascript">
+    RED.nodes.registerType("max-control", {
+        category: "MAX",
+        color: "#90cce4",
+        icon: "bridge.svg",
+        defaults: {
+            name: { value: "" },
+            targetPanel: { type: "max-panel", required: true },
+            buttonText: {
+                value: "",
+                required: true,
+                validate: function (v) {
+                    return v && v.trim().length > 0;
+                }
+            },
+            buttonPayload: {
+                value: "",
+                required: true,
+                validate: function (v) {
+                    if (!v || !v.trim()) { return false; }
+                    var myId = this.id;
+                    var found = false;
+                    RED.nodes.eachNode(function (n) {
+                        if (n.type === "max-control" && n.id !== myId && n.buttonPayload === v) {
+                            found = true;
+                        }
+                    });
+                    return !found;
+                }
+            }
+        },
+        inputs: 0,
+        outputs: 1,
+        label: function () {
+            return this.name || (this.buttonText ? this.buttonText : "max-control");
+        },
+        labelStyle: function () { return this.name ? "" : "node_label_italic"; },
+        oneditprepare: function () {
+            var editingId = this.id;
+            var _ = this._;
+
+            // Real-time highlight: targetPanel
+            $("#node-input-targetPanel").off("change").on("change", function () {
+                var panelVal = $(this).val();
+                if (!panelVal || panelVal === "_ADD_") {
+                    $(this).addClass("input-error");
+                    $("#max-control-panel-hint").text(_("max-control.validate.targetPanelEmptyHint")).show();
+                } else {
+                    $(this).removeClass("input-error");
+                    $("#max-control-panel-hint").hide();
+                }
+            });
+
+            // Real-time highlight: buttonText
+            $("#node-input-buttonText").off("input").on("input", function () {
+                if (!$(this).val().trim()) {
+                    $(this).addClass("input-error");
+                    $("#max-control-text-hint").text(_("max-control.validate.buttonTextEmptyHint")).show();
+                } else {
+                    $(this).removeClass("input-error");
+                    $("#max-control-text-hint").hide();
+                }
+            });
+
+            // Real-time highlight: buttonPayload
+            $("#node-input-buttonPayload").off("input").on("input", function () {
+                var payloadVal = $(this).val().trim();
+                if (!payloadVal) {
+                    $(this).addClass("input-error");
+                    $("#max-control-payload-hint").text(_("max-control.validate.buttonPayloadEmptyHint")).show();
+                } else {
+                    var found = false;
+                    var conflictName = "";
+                    RED.nodes.eachNode(function (n) {
+                        if (n.type === "max-control" && n.id !== editingId && n.buttonPayload === payloadVal) {
+                            found = true;
+                            conflictName = n.name || n.buttonText;
+                        }
+                    });
+                    if (found) {
+                        $(this).addClass("input-error");
+                        $("#max-control-payload-hint").text(_("max-control.validate.buttonPayloadDuplicateHint") + " " + conflictName).show();
+                    } else {
+                        $(this).removeClass("input-error");
+                        $("#max-control-payload-hint").hide();
+                    }
+                }
+            });
+
+            // ── Capture-phase click on save button ──
+            var okBtn = document.getElementById("node-dialog-ok");
+            if (okBtn && window._maxControlOkHandler) {
+                okBtn.removeEventListener("click", window._maxControlOkHandler, true);
+            }
+            if (okBtn) {
+                window._maxControlOkHandler = function (e) {
+                    var valid = true;
+
+                    // targetPanel
+                    var panelVal = $("#node-input-targetPanel").val();
+                    if (!panelVal || panelVal === "_ADD_") {
+                        $("#node-input-targetPanel").addClass("input-error");
+                        valid = false;
+                    }
+
+                    // buttonText
+                    var textVal = $("#node-input-buttonText").val().trim();
+                    if (!textVal) {
+                        $("#node-input-buttonText").addClass("input-error");
+                        valid = false;
+                    }
+
+                    // buttonPayload
+                    var payloadVal = $("#node-input-buttonPayload").val().trim();
+                    if (!payloadVal) {
+                        $("#node-input-buttonPayload").addClass("input-error");
+                        valid = false;
+                    } else {
+                        var found = false;
+                        RED.nodes.eachNode(function (n) {
+                            if (n.type === "max-control" && n.id !== editingId && n.buttonPayload === payloadVal) {
+                                found = true;
+                            }
+                        });
+                        if (found) {
+                            $("#node-input-buttonPayload").addClass("input-error");
+                            valid = false;
+                        }
+                    }
+
+                    if (!valid) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        RED.notify(_("max-control.validate.checkFields"), "error");
+                    }
+                };
+                okBtn.addEventListener("click", window._maxControlOkHandler, true);
+            }
+        },
+        oneditvalidate: function () {
+            try {
+                var editingId = this.id;
+                var valid = true;
+
+                var panelVal = $("#node-input-targetPanel").val();
+                if (!panelVal || panelVal === "_ADD_") { valid = false; }
+
+                var textVal = $("#node-input-buttonText").val().trim();
+                if (!textVal) { valid = false; }
+
+                var payloadVal = $("#node-input-buttonPayload").val().trim();
+                if (!payloadVal) { valid = false; }
+                else {
+                    var found = false;
+                    RED.nodes.eachNode(function (n) {
+                        if (n.type === "max-control" && n.id !== editingId && n.buttonPayload === payloadVal) {
+                            found = true;
+                        }
+                    });
+                    if (found) { valid = false; }
+                }
+
+                return valid;
+            } catch (e) {
+                return false;
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="max-control">
+    <div class="form-row">
+        <label for="node-input-name">
+            <i class="fa fa-tag"></i> <span data-i18n="max-control.label.name"></span>
+        </label>
+        <input type="text" id="node-input-name"
+               data-i18n="[placeholder]max-control.placeholder.name"
+               style="width: 70%;">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-targetPanel">
+            <i class="fa fa-th-large"></i> <span data-i18n="max-control.label.targetPanel"></span>
+        </label>
+        <input type="text" id="node-input-targetPanel" style="width: 70%;">
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-control-panel-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-buttonText">
+            <i class="fa fa-keyboard-o"></i> <span data-i18n="max-control.label.buttonText"></span>
+        </label>
+        <input type="text" id="node-input-buttonText"
+               data-i18n="[placeholder]max-control.placeholder.buttonText"
+               style="width: 70%;">
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-control-text-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-buttonPayload">
+            <i class="fa fa-cog"></i> <span data-i18n="max-control.label.buttonPayload"></span>
+        </label>
+        <input type="text" id="node-input-buttonPayload"
+               data-i18n="[placeholder]max-control.placeholder.buttonPayload"
+               style="width: 70%;">
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-control-payload-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-tips" style="width: 89%;">
+        <span data-i18n="[html]max-control.tip.targetPanel"></span><br>
+        <span data-i18n="[html]max-control.tip.buttonText"></span><br>
+        <span data-i18n="[html]max-control.tip.buttonPayload"></span>
+    </div>
+</script>

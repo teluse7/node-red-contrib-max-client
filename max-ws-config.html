@@ -1,0 +1,373 @@
+<script type="text/javascript">
+    RED.nodes.registerType("max-ws-config", {
+        category: "config",
+        defaults: {
+            botUrl: {
+                value: "",
+                required: true,
+                validate: function (v) {
+                    return v && v.trim().length > 0
+                }
+            },
+            refreshInterval: { value: 28800, required: true, validate: RED.validators.number() },
+            midKey: {
+                value: "max_panel_mid",
+                required: true,
+                validate: function (v) {
+                    if (!v || !v.trim()) { return false; }
+                    var myId = this.id;
+                    var found = false;
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.id !== myId && n.type === "max-ws-config" && n.midKey === v) 
+                            found = true
+                    });
+                    return !found
+                }
+            },
+            contextStore: { value: "default" },
+          //maxUsers: { value: "[]" }
+        },
+        credentials: {
+            maxUsers: {}
+        },
+        label: function () {
+            return this.botUrl ? "MAX: " + this.botUrl : "MAX WebSocket"
+        },
+        oneditprepare: function () {
+            var editingId = this.id;
+            var node = this;
+            var _ = this._;
+
+            // typedInput for midKey 
+            var $input = $("#node-config-input-midKey");
+        
+            var currentVal = node.midKey || "max_panel_mid";
+            var type = "global";
+            var store = "default";
+        
+            // typedInput
+            $input.typedInput({
+                type: "typedInput",
+                default: type,
+                value: currentVal,
+                types: ["global"],
+                store: true,
+                storeDefault: store,
+                storeTypes: RED.settings.context.stores || ["default"],
+                storeChanged: function(newStore) {
+                    node.contextStore = newStore;
+                },
+                validate: function(v) {
+                    if (!v || !v.trim()) return false;
+                    
+                    // MID Unique
+                    var found = false;
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.id !== editingId && n.type === "max-ws-config" && n.midKey === v) 
+                            found = true
+                    });
+                    return !found
+                }
+            });
+        
+            // real-time validation 
+            $input.on("change", function() {
+                var val = $input.val();
+                var $inner = $input.find("input");
+                var $hint = $("#max-midkey-hint");
+        
+                $hint.hide();
+                $inner.removeClass("input-error");
+        
+                if (!val || !val.trim()) {
+                    $inner.addClass("input-error");
+                    $hint.text(_("max-ws-config.validate.midKeyEmpty")).show();
+                    return
+                }
+        
+                var found = false;
+                var conflictName = "";
+                RED.nodes.eachConfig(function (n) {
+                    if (n.type === "max-ws-config" && n.id !== editingId && n.midKey === val) {
+                        found = true;
+                        conflictName = n.botUrl || "max-ws-config"
+                    }
+                });
+        
+                if (found) {
+                    $inner.addClass("input-error");
+                    $hint.text(_("max-ws-config.validate.midKeyDuplicateHint") + conflictName).show()
+                }
+            });
+            
+            // ── User list ──
+            var userList = $("#max-user-list");
+
+            var usersArr = [];
+            try {
+              //if (node.maxUsers && typeof node.maxUsers === "string") {
+              //    var parsed = JSON.parse(node.maxUsers);
+              //    if (Array.isArray(parsed)) usersArr = parsed 
+              //} else if (node.maxUsers && Array.isArray(node.maxUsers)) 
+              //    usersArr = node.maxUsers
+                var rawUsers = (node.credentials && node.credentials.maxUsers) || "";
+                if (rawUsers && typeof rawUsers === "string") {
+                    var parsed = JSON.parse(rawUsers);
+                    if (Array.isArray(parsed)) usersArr = parsed
+                } else if (rawUsers && Array.isArray(rawUsers)) 
+                    usersArr = rawUsers
+            } catch (e) {}
+
+            userList.empty();
+
+            // ── Validate users (CSS border approach from v2.9.21) ──
+            function validateUsers() {
+                var count = 0;
+                $(".max-user-row").each(function () {
+                    var uid = $(this).find(".max-user-id").val().trim();
+                    var tok = $(this).find(".max-user-token").val().trim();
+                    if (uid && tok) count++
+                });
+                if (count === 0) {
+                    $("#max-user-list").css({
+                        "border": "1px solid #d9534f",
+                        "border-radius": "4px",
+                        "padding": "6px"
+                    });
+                    $("#max-users-hint").text(_("max-ws-config.validate.usersEmptyHint")).show()
+                } else {
+                    $("#max-user-list").css({
+                        "border": "",
+                        "border-radius": "",
+                        "padding": ""
+                    });
+                    $("#max-users-hint").hide()
+                }
+                return count > 0
+            }
+
+            function serializeMaxUsers() {
+                var usersData = [];
+                $(".max-user-row").each(function () {
+                    var uid = $(this).find(".max-user-id").val().trim();
+                    var tok = $(this).find(".max-user-token").val().trim();
+                    if (uid && tok) usersData.push({ userId: uid, token: tok }) 
+                });
+                $("#node-config-input-maxUsers").val(JSON.stringify(usersData));
+                validateUsers()
+            }
+
+            function buildUserRow(userId, token) {
+                var row = $(
+                    '<div class="max-user-row" style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">' +
+                        '<input type="text" class="max-user-id" placeholder="1234567" style="width:160px;flex-shrink:0;" />' +
+                        '<input type="password" class="max-user-token" placeholder="Token" style="flex:1;min-width:0;" />' +
+                        '<button type="button" class="max-user-remove" style="flex-shrink:0;width:30px;height:30px;border:none;background:#d9534f;color:white;border-radius:4px;cursor:pointer;font-size:16px;">&times;</button>' +
+                    '</div>'
+                );
+                row.find(".max-user-id").val(userId || "");
+                row.find(".max-user-token").attr("placeholder", _("max-ws-config.placeholder.token"));
+                row.find(".max-user-token").val(token || "");
+                row.find(".max-user-remove").on("click", function () {
+                    row.remove();
+                    serializeMaxUsers()
+                });
+                row.find("input").on("input change", function () {
+                    serializeMaxUsers()
+                });
+                userList.append(row)
+            }
+
+            if (usersArr.length === 0) 
+                buildUserRow("", "")
+            else 
+                for (var i = 0; i < usersArr.length; i++) 
+                    buildUserRow(usersArr[i].userId || "", usersArr[i].token || "");
+
+            validateUsers();
+
+            $("#max-add-user-btn").off("click").on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                buildUserRow("", "");
+                validateUsers()
+            });
+
+            // ── Real-time highlight: botUrl ──
+            $("#node-config-input-botUrl").off("input").on("input", function () {
+                if (!$(this).val().trim()) {
+                    $(this).addClass("input-error");
+                    $("#max-boturl-hint").text(_("max-ws-config.validate.botUrlEmpty")).show()
+                } else {
+                    $(this).removeClass("input-error");
+                    $("#max-boturl-hint").hide()
+                }
+            });
+
+            // ── Capture-phase click on save button (from v2.9.21) ──
+            var okBtn = document.getElementById("node-config-dialog-ok");
+            if (okBtn && window._maxWsConfigOkHandler) 
+                okBtn.removeEventListener("click", window._maxWsConfigOkHandler, true);
+            if (okBtn) {
+                window._maxWsConfigOkHandler = function (e) {
+                    var valid = true;
+
+                    // botUrl
+                    if (!$("#node-config-input-botUrl").val().trim()) {
+                        $("#node-config-input-botUrl").addClass("input-error");
+                        valid = false
+                    }
+
+                    // midKey
+                    var midKeyVal = $("#node-config-input-midKey").val();
+                    if (!midKeyVal || !midKeyVal.trim()) {
+                        var $inner = $("#node-config-input-midKey").find("input");
+                        $inner.addClass("input-error");
+                        $("#max-midkey-hint").text(_("max-ws-config.validate.midKeyEmpty")).show();
+                        valid = false
+                    } else {
+                        var found = false;
+                        RED.nodes.eachConfig(function (n) {
+                            if (n.type === "max-ws-config" && n.id !== editingId && n.midKey === midKeyVal) found = true
+                        });
+                        if (found) {
+                            var $inner = $("#node-config-input-midKey").find("input");
+                            $inner.addClass("input-error");
+                            $("#max-midkey-hint").text(_("max-ws-config.validate.midKeyDuplicateError")).show();
+                            valid = false
+                        }
+                    }
+
+                    // users
+                    if (!validateUsers()) 
+                        valid = false;
+
+                    if (!valid) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        RED.notify(_("max-ws-config.validate.checkFields"), "error")
+                    }
+                }
+                okBtn.addEventListener("click", window._maxWsConfigOkHandler, true)
+            }
+        },
+        oneditsave: function () {
+            var usersData = [];
+            $(".max-user-row").each(function () {
+                var uid = $(this).find(".max-user-id").val().trim();
+                var tok = $(this).find(".max-user-token").val().trim();
+                if (uid && tok) usersData.push({ userId: uid, token: tok })
+            });
+            $("#node-config-input-maxUsers").val(JSON.stringify(usersData));
+
+            if (!this.contextStore) this.contextStore = "default"
+        },
+        oneditvalidate: function () {
+            try {
+                var _ = this._;
+                var valid = true;
+
+                // ── botUrl ──
+                var botUrlVal = $("#node-config-input-botUrl").val();
+                if (!botUrlVal || !botUrlVal.trim()) {
+                    $("#node-config-input-botUrl").addClass("input-error");
+                    RED.notify(_("max-ws-config.validate.botUrlEmpty"), "error");
+                    valid = false
+                }
+
+                // ── midKey (теперь это и ключ, и хранилище) ──
+                var midKeyVal = $("#node-config-input-midKey").val();
+                if (!midKeyVal || !midKeyVal.trim()) {
+                    $("#node-config-input-midKey").addClass("input-error");
+                    RED.notify(_("max-ws-config.validate.midKeyEmpty"), "error");
+                    valid = false
+                } else {
+                    var found = false;
+                    var editingId = this.id;
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.type === "max-ws-config" && n.id !== editingId && n.midKey === midKeyVal) found = true
+                    });
+                    if (found) {
+                        $("#node-config-input-midKey").addClass("input-error");
+                        RED.notify(_("max-ws-config.validate.midKeyDuplicateError") + " '" + midKeyVal + "'.", "error");
+                        valid = false
+                    }
+                }
+
+                // ── Users ──
+                var count = 0;
+                $(".max-user-row").each(function () {
+                    var uid = $(this).find(".max-user-id").val().trim();
+                    var tok = $(this).find(".max-user-token").val().trim();
+                    if (uid && tok) count++
+                });
+                if (count === 0) { 
+                    $("#max-user-list").addClass("input-error");
+                    RED.notify(_("max-ws-config.validate.usersEmpty"), "error");
+                    valid = false 
+                }
+
+                return valid
+            } catch (e) {
+                return false
+            }
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="max-ws-config">
+    <div class="form-row">
+        <label for="node-config-input-botUrl">
+            <i class="fa fa-globe"></i> <span data-i18n="max-ws-config.label.botUrl"></span>
+        </label>
+        <input type="text" id="node-config-input-botUrl"
+               data-i18n="[placeholder]max-ws-config.placeholder.botUrl"
+               style="width: 70%;">
+        <div style="margin-left: 110px; margin-bottom: 4px;">
+            <span id="max-boturl-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <label for="node-config-input-refreshInterval">
+            <i class="fa fa-clock-o"></i> <span data-i18n="max-ws-config.label.refreshInterval"></span>
+        </label>
+        <input type="number" id="node-config-input-refreshInterval"
+               value="28800" min="0" max="604800" style="width: 120px;">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-midKey">
+            <i class="fa fa-key"></i> <span data-i18n="max-ws-config.label.midKey"></span>
+        </label>
+        <input type="text" id="node-config-input-midKey"
+               data-i18n="[placeholder]max-ws-config.placeholder.midKey"
+               style="width: 70%;">
+        <div style="margin-left: 110px; margin-bottom: 4px;">
+            <span id="max-midkey-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <input type="hidden" id="node-config-input-maxUsers" value="[]">
+
+    <div class="form-row">
+        <label for="node-config-input-maxUsers" style="vertical-align: top;">
+            <i class="fa fa-users"></i> <span data-i18n="max-ws-config.label.users"></span>
+        </label>
+        <div style="display:inline-block;width:70%;">
+            <div id="max-user-list"></div>
+            <button type="button" id="max-add-user-btn"
+                    style="margin-top:6px;padding:4px 12px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer;">
+                + <span data-i18n="max-ws-config.label.addUser"></span>
+            </button>
+            <span id="max-users-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-tips" style="width: 82% !important; max-width: none !important; box-sizing: border-box; margin-top: 15px; padding: 10px;">
+        <span data-i18n="[html]max-ws-config.tip.botUrl"></span><br>
+        <span data-i18n="[html]max-ws-config.tip.refresh"></span><br>
+        <span data-i18n="[html]max-ws-config.tip.midKey"></span><br>
+        <span data-i18n="[html]max-ws-config.tip.users"></span>
+    </div>
+</script>

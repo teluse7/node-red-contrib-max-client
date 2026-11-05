@@ -20,10 +20,15 @@
     "license": "Apache-2.0",
     "node-red": {
         "nodes": {
+            "max-ws-config": "max-ws-config.js",
+            "max-panel": "max-panel.js",
+            "max-control": "max-control.js",
+            "max-switch": "max-switch.js",
             "max-send": "max-send.js"
         }
     },
     "dependencies": {
-        "puppeteer": "^17.0.0"
+        "puppeteer": "^17.0.0",
+        "ws": "^8.16.0"
     }
 }

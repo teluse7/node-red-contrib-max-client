@@ -3,21 +3,80 @@
         category: 'MAX',
         color: '#90cce4',
         defaults: {
-            'name': { value: "" },
-            'url': { value: "" },
-            'userid': { value: "" },
-            'scrshot': { value: false },
-            'canvasctrl': { value: false },
-            'serviceurl': { value: "" }
-        },
-        credentials: {
-            'token': { type: "text" }
+            name: { value: "" },
+            config: { type: "max-ws-config", required: true },
+            scrshot: { value: false },
+            canvasctrl: { value: false },
+            serviceurl: { value: "" }
         },
         inputs: 1,
         outputs: 1,
         icon: "max-icon.png",
         label: function() {
-            return this.name || "node-red-contrib-max-client";
+            return this.name || (this.config ? "Send to MAX: " + RED.nodes.nodeName(this.config) : "max-send")
+        },
+        labelStyle: function () { return this.name ? "" : "node_label_italic"; },
+
+        oneditprepare: function () {
+            var editingId = this.id;
+            var _ = this._;
+
+            // Real-time highlight: config
+            $("#node-input-config").off("change").on("change", function () {
+                var configVal = $(this).val();
+                if (!configVal || configVal === "_ADD_") {
+                    $(this).addClass("input-error");
+                    $("#max-send-config-hint").text(_("max-send.validate.configNotSelectedHint")).show();
+                } else {
+                    $(this).removeClass("input-error");
+                    $("#max-send-config-hint").hide();
+                }
+            });
+
+            // ── Capture-phase click on save button ──
+            var okBtn = document.getElementById("node-dialog-ok");
+            if (okBtn && window._maxSendOkHandler) {
+                okBtn.removeEventListener("click", window._maxSendOkHandler, true);
+            }
+            if (okBtn) {
+                window._maxSendOkHandler = function (e) {
+                    var valid = true;
+
+                    // config
+                    var configVal = $("#node-input-config").val();
+                    if (!configVal || configVal === "_ADD_") {
+                        $("#node-input-config").addClass("input-error");
+                        valid = false;
+                    } else {
+                        // Если конфиг выбран — убираем ошибку, даже если она была раньше
+                        $("#node-input-config").removeClass("input-error");
+                        $("#max-send-config-hint").hide();
+                    }
+
+                    if (!valid) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        RED.notify(_("max-send.validate.checkFields"), "error");
+                    }
+                };
+                okBtn.addEventListener("click", window._maxSendOkHandler, true);
+            }
+        },
+
+        oneditvalidate: function () {
+            try {
+                var editingId = this.id;
+                var valid = true;
+
+                var configVal = $("#node-input-config").val();
+                if (!configVal || configVal === "_ADD_") {
+                    valid = false;
+                }
+
+                return valid;
+            } catch (e) {
+                return false;
+            }
         }
     });
 </script>
@@ -25,18 +84,43 @@
 <script type="text/html" data-template-name="max-send">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i><span data-i18n="max-send.label.name" /></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]max-send.placeholder.name" /><br>
-        <label for="node-input-url"><i class="fa fa-globe"></i><span data-i18n="max-send.label.url" /></label>
-        <input type="text" id="node-input-url" data-i18n="[placeholder]max-send.placeholder.url" /><br>
-        <label for="node-input-user-id"><i class="fa fa-mobile"></i><span data-i18n="max-send.label.userid" /></label>
-        <input type="text" id="node-input-userid" data-i18n="[placeholder]max-send.placeholder.userid" /><br>
-        <label for="node-input-token"><i class="fa fa-key"></i><span data-i18n="max-send.label.token" /></label>
-        <input type="text" id="node-input-token" data-i18n="[placeholder]max-send.placeholder.token" /><br>
-        <label for="node-input-scrshot"><i class="fa fa-picture-o"></i><span data-i18n="max-send.label.scrshot" /></label>
-        <input type="checkbox" id="node-input-scrshot" name="scrshot" /><br>
-        <label for="node-input-canvasctrl"><i class="fa fa-line-chart"></i><span data-i18n="max-send.label.canvasctrl" /></label>
-        <input type="checkbox" id="node-input-canvasctrl" name="canvasctrl" /><br>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]max-send.placeholder.name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-config"><i class="fa fa-server"></i><span data-i18n="max-send.label.config" /></label>
+        <input type="text" id="node-input-config" style="width: 70%;" />
+        <div style="margin-left: 110px; margin-top: 4px;">
+            <span id="max-send-config-hint" style="color:#d9534f;display:none;font-size:12px;margin-left:8px;"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label style="width: auto;">
+            <input type="checkbox" id="node-input-scrshot" style="width: auto; margin-top: -2px;">
+            <span data-i18n="max-send.label.scrshot"></span>
+        </label>
+        <div style="font-size:11px;color:#888;margin-top:0;" data-i18n="max-send.tip.scrshot_min"></div>
+    </div>
+
+    <div class="form-row">
+        <label style="width: auto;">
+            <input type="checkbox" id="node-input-canvasctrl" style="width: auto; margin-top: -2px;">
+            <span data-i18n="max-send.label.canvasctrl"></span>
+        </label>
+        <div style="font-size:11px;color:#888;margin-top:0;" data-i18n="max-send.tip.canvasctrl_min"></div>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-serviceurl"><i class="fa fa-camera"></i><span data-i18n="max-send.label.serviceurl" /></label>
-        <input type="text" id="node-input-serviceurl" data-i18n="[placeholder]max-send.placeholder.serviceurl" /><br>
+        <input type="text" id="node-input-serviceurl" data-i18n="[placeholder]max-send.placeholder.serviceurl" />
+    </div>
+
+    <div class="form-tips" style="width: 88%;">
+        <span data-i18n="[html]max-send.tip.name"></span>
+        <span data-i18n="[html]max-send.tip.config"></span>
+        <span data-i18n="[html]max-send.tip.scrshot"></span>
+        <span data-i18n="[html]max-send.tip.canvasctrl"></span>
+        <span data-i18n="[html]max-send.tip.serviceurl"></span>
     </div>
 </script>

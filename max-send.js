@@ -3,26 +3,39 @@ module.exports = function (RED) {
 
     function MaxClientNode(config) {
         RED.nodes.createNode(this, config);
-        
-        this.url = config.url;
-        this.userid = config.userid;
-        this.scrshot = config.scrshot;
-        this.canvasctrl = config.canvasctrl;
-        this.serviceurl = config.serviceurl;
-
         let node = this;
         
+        const configNode = RED.nodes.getNode(config.config);
+        if (!configNode) {
+            node.error("max-send: no config node selected");
+            return
+        }
+
+        node.url = (configNode.botUrl || "").trim().replace(/^https?:\/\//, "").replace(/^http?:\/\//, "").replace(/^wss?:\/\//, ""); 
+        node.users = configNode.users || []; 
+        node.scrshot = config.scrshot;
+        node.canvasctrl = config.canvasctrl;
+        node.serviceurl = config.serviceurl;
+
         node.on('input', async function(msg) {
-            let url = node.url;
-            let userid = node.userid;
-            let token = node.credentials.token;
+            let url = 'https://' + node.url;
+            let users = node.users;
+            if (users.length === 0) {
+                node.warn("max-send: no users in config");
+                node.send(msg);
+                return;
+            }
+            let token = users[0].token;
+
             let scrshot = node.scrshot;
             let canvasctrl = node.canvasctrl;
             let serviceurl = node.serviceurl; 
             let fillColor;
 
+            const text = msg.payload?.text ?? msg.payload;
+
             const attach = scrshot ? (            
-                await msg.payload.match(/https?:\/\/[^\s]+/g)?.map((iUrl,i) =>   
+                await text.match(/https?:\/\/[^\s]+/g)?.map((iUrl,i) =>   
                    fetch(url + '/uploads?type=image', {
                        method: 'POST',
                        headers: {
@@ -56,32 +69,33 @@ module.exports = function (RED) {
                 ) || []
             ) : [];
 
-           
             Promise.all(attach)
-                .then (value => 
-                    fetch(url + '/messages?user_id=' + userid.match(/^(?:\+)?([a-zA-Z0-9а-яА-Я_-]{1,6})/)[1], {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': token
-                        },
-                        body: JSON.stringify({ 
-                            text: msg.payload,
-                            ...(value[0]?.payload?.photos ? { attachments: value } : {})
+                .then (value => { 
+                    for(const user of users.filter(u => u.userId === (msg.payload?.user ?? u.userId))) 
+                        fetch(url + '/messages?user_id=' + user.userId.match(/^(?:\+)?([a-zA-Z0-9а-яА-Я_-]{1,6})/)[1], {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': user.token
+                            },
+                            body: JSON.stringify({ 
+                                text: text,
+                                ...(value[0]?.payload?.photos ? { attachments: value } : {})
+                            })
                         })
-                    })
-                        .then(response => 
-                            fillColor ?? (response.ok
-                                ? node.status({ fill: "green", shape: "dot", text: RED._('max-send.status.send') + userid })
-                                : node.status({ fill: "red", shape: "ring", text: 'max-send.status.' + response.status })
-                            )   
-                        )                           
-                        .catch (error => 
-                            fillColor ?? (error.message == 'fetch failed'           
-                                ? node.status({ fill: "red", shape: "ring", text: RED._('max-send.status.error') + url })
-                                : node.status({ fill: "red", shape: "ring", text: error.message })
+                            .then(response => 
+                                fillColor ?? (response.ok
+                                    ? node.status({ fill: "green", shape: "dot", text: RED._('max-send.status.send') + user.userId })
+                                    : node.status({ fill: "red", shape: "ring", text: 'max-send.status.' + response.status })
+                                )   
+                            )                           
+                            .catch (error => 
+                                fillColor ?? (error.message == 'fetch failed'           
+                                    ? node.status({ fill: "red", shape: "ring", text: RED._('max-send.status.error') + url })
+                                    : node.status({ fill: "red", shape: "ring", text: error.message })
+                                )
                             )
-                        )
+                }
                 );
 
             node.send(msg);
@@ -227,9 +241,5 @@ module.exports = function (RED) {
         }
     }
 
-    RED.nodes.registerType("max-send", MaxClientNode, {
-        credentials: {
-            token: { type: 'text' }
-        }
-    });
+    RED.nodes.registerType("max-send", MaxClientNode);
 }
