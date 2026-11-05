@@ -1,0 +1,24 @@
+{
+    "max-switch": {
+        "label": {
+            "name": "Имя",
+            "targetPanel": "Панель"
+        },
+        "placeholder": {
+            "name": "Наименование узла"
+        },
+        "validate": {
+            "targetPanelEmpty": "Выберите панель для переключения",
+            "targetPanelEmptyHint": "Выберите панель для переключения",
+            "checkFields": "Проверьте выделенные красным поля."
+        },
+        "log": {
+            "noPanel": "Панель не найдена",
+            "noConfig": "Соединение не найдено"
+        },
+        "status": {
+            "switched": "Панель переключена",
+            "switchedUser": "Панель переключена для пользователя "
+        }
+    }
+}

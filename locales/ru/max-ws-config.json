@@ -1,0 +1,67 @@
+{
+    "max-ws-config": {
+        "label": {
+            "botUrl": "URL",
+            "refreshInterval": "Интервал",
+            "midKey": "Ключ MID",
+            "contextStore": "Хранилище контекста",
+            "users": "Адресаты",
+            "addUser": "Добавить пользователя"
+        },
+        "placeholder": {
+            "botUrl": "Адрес MAX-бота",
+            "midKey": "Глобальная переменная для ID панели",
+            "token": "Токен"
+        },
+        "tip": {
+            "botUrl": "<b>URL</b> — Адрес сервера MAX без протокола. Например: bot.max.ru.<br>",
+            "refresh": "<b>Интервал</b> — Как часто обновлять панель. 0 — не обновлять. По умолчанию 28800 (8 часов).<br>",
+            "midKey": "<b>Ключ MID</b> — Уникальный ключ для хранения MID. Должен быть уникальным для каждого соединения.<br>",
+            "users": "<b>Адресаты</b> — Добавьте адресатов в MAX (ID, токен), которые получат панель управления и которым будут отсылаться уведомления."
+        },
+        "validate": {
+            "botUrlEmpty": "URL MAX-бота не указан",
+            "midKeyEmpty": "Ключ MID не указан",
+            "midKeyDuplicateHint": "Дубликат: ключ уже используется в",
+            "midKeyDuplicateError": "Дубликат ключа MID",
+            "usersEmpty": "Добавьте хотя бы одного адресата",
+            "usersEmptyHint": "Добавьте хотя бы одного адресата с ID и токеном",
+            "checkFields": "Проверьте выделенные красным поля."
+        },
+        "status": {
+            "connecting": "Подключение к",
+            "connected": "Подключено",
+            "reconnecting": "Переподключение через"
+        },
+        "log": {
+            "invalidInterval": "Некорректный интервал обновления, установлен по умолчанию: 8 часов",     
+            "parseUsersError": "max-ws-config: не удалось разобрать список пользователей: ",
+            "listenerError": "Ошибка слушателя: ",
+            "defaultPanelNotFound": "Панель по умолчанию не найдена: ",
+            "sendPanelUserError": "Не удалось отправить панель пользователю ",
+            "userNotFound": "Пользователь не найден: ",
+            "sendPanelAllError": "Не удалось отправить панель всем: ",
+            "deleteMidError": "Не удалось удалить старый MID: ",
+            "noButtons": "max-ws-config: нет кнопок для активной панели '",
+            "noButtonsUser": "', отправка пользователю ",
+            "noButtonsSkip": " пропущена",
+            "panelError": "Ошибка отправки панели: ",
+            "refreshError": "Ошибка обновления панелей: ",
+            "startSendError": "Ошибка при начальной отправке панелей: ",
+            "deployRestart": "Выполняется deploy, перезапуск таймера...", 
+            "timerRestarted": "Таймер перезапущен, интервал: ",
+            "timerRestartedValue": " секунд",
+            "alreadyConnected": "Подключение уже активно для пользователя ",
+            "parseJSONerror": "Ошибка парсинга JSON: ",
+            "arrayItemError": "Ошибка при обработке элемента массива: ",
+            "objectError": "Ошибка при обработке одиночного объекта: ",
+            "invalidFormat": "Некорректный формат данных",
+            "criticalError": "Критическая ошибка при обработке сообщения: ",
+            "invalidEvent": "Некорректное событие",
+            "serverShutdown": "Сервер закрыл соединение: ",
+            "wsError": "Ошибка WebSocket: ",
+            "statusListenerError": "Ошибка слушателя статуса: ",
+            "noPanels": "max-ws-config: Нет панелей, нет подключения"
+        }
+    }
+}

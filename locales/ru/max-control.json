@@ -1,0 +1,43 @@
+{
+    "max-control": {
+        "label": {
+            "name": "Имя",
+            "targetPanel": "Панель",
+            "buttonText": "Кнопка",
+            "buttonPayload": "Действие"
+        },
+        "placeholder": {
+            "name": "Наименование узла",
+            "buttonText": "Название кнопки",
+            "buttonPayload": "Название действия (callback)"
+        },
+        "validate": {
+            "targetPanelEmpty": "Панель обязательна",
+            "targetPanelEmptyHint": "Выберите панель",
+            "buttonTextEmpty": "Текст кнопки не указан",
+            "buttonTextEmptyHint": "Текст кнопки не может быть пустым",
+            "buttonPayloadEmpty": "Действие не указано",
+            "buttonPayloadEmptyHint": "Действие не может быть пустым",
+            "buttonPayloadDuplicateError": "Действие уже используется в другой кнопке",
+            "buttonPayloadDuplicateHint": "Дубликат: действие уже используется в",
+            "checkFields": "Проверьте выделенные красным поля."
+        },
+        "tip": {
+            "targetPanel": "<b>Панель</b> — Панель, в которую добавится кнопка в MAX.<br>",
+            "buttonText": "<b>Кнопка</b> — Текст, который отображается на кнопке в панели.<br>",
+            "buttonPayload": "<b>Действие</b> — Уникальный идентификатор действия.<br><b>Должен быть уникальным</b> среди всех узлов max-control.<br>При нажатии кнопки это значение придёт в msg.payload."
+        },
+        "status": {
+            "connected": "Подключено",
+            "partial": "Частично ",
+            "panelSent": "Панель отправлена",
+            "disconnected": "Отключено",
+            "callbackUser": "Сработало для ",
+            "callback": "Сработало"
+        },
+        "error": {
+            "panelNotFound": "max-control: панель не найдена",
+            "configNotFound": "max-control: конфигурация не найдена"
+        }
+    }
+}
