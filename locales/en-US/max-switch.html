@@ -1,0 +1,27 @@
+<script type="text/html" data-help-name="max-switch"> 
+    <p>MAX panel switch node.</p> 
+    <p>Switches the active panel to the specified one. Accepts any incoming message.</p> 
+    <p>If the <b>topic</b> contains a user identifier, the switch is applied only to that user.</p> 
+ 
+    <h3>Settings</h3> 
+    <dl class="message-properties"> 
+        <dt>Name</dt> 
+        <dd>The node name displayed in the Node-RED editor. If not specified, “max-switch” is used.</dd> 
+ 
+        <dt>Panel <span class="required">required</span></dt> 
+        <dd>Reference to the <code>max-panel</code> node (control panel in MAX). This field must be selected; saving is not possible without it.</dd> 
+    </dl> 
+ 
+    <h3>Input</h3> 
+    <dl class="message-properties"> 
+        <dt>payload.user</dt> 
+        <dd>User identifier if the switch should be applied to a specific user only.</dd> 
+    </dl> 
+ 
+    <h3>Statuses</h3> 
+    <ul> 
+        <li><b>Yellow ring</b> — initializing</li> 
+        <li><b>Green dot</b> — panel switched</li> 
+        <li><b>Red ring</b> — disconnected from MAX</li> 
+    </ul> 
+</script>

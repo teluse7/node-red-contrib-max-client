@@ -1,0 +1,24 @@
+{
+    "max-switch": {
+        "label": {
+            "name": "Name",
+            "targetPanel": "Panel"
+        },
+        "placeholder": {
+            "name": "Node name"
+        },
+        "validate": {
+            "targetPanelEmpty": "Select target panel",
+            "targetPanelEmptyHint": "Select target panel",
+            "checkFields": "Please check the highlighted fields."
+        },
+        "log": {
+            "noPanel": "Panel not found",
+            "noConfig": "Connection not found"
+        },
+        "status": {
+            "switched": "Panel switched",
+            "switchedUser": "Panel switched for user "
+        }
+    }
+}

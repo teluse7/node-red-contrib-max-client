@@ -1,0 +1,35 @@
+<script type="text/html" data-help-name="max-ws-config">
+    <p>MAX bot connection configuration node.</p>
+    <p>Supports multiple users, automatic reconnection, and panel management.</p>
+    <p>Establishes persistent WSS connections to the MAX server, through which it receives panel button press events. It is also responsible for sending and updating the button panel.</p>
+
+    <h3>Settings</h3>
+    <dl class="message-properties">
+        <dt>URL <span class="required">required</span></dt>
+        <dd>MAX bot address without protocol. The <code>https://</code> and <code>wss://</code> protocols are automatically stripped. Example: <code>notify.example.com</code></dd>
+
+        <dt>Interval <span class="required">required</span></dt>
+        <dd>Panel auto-refresh interval in seconds. Default is 28800 (8 hours). A value of <code>0</code> disables auto-refresh. On refresh, the old message is removed and a new one is sent.</dd>
+
+        <dt>MID key <span class="required">required</span></dt>
+        <dd>Name of the global variable to store the message identifier (MID). <b>Must be unique</b> among all <code>max-ws-config</code> nodes. Used to delete the old panel before sending a new one.</dd>
+        <dd>The Node-RED context storage for the MID key is selected from the options available in <code>settings.js</code>. It is recommended to choose <code>file</code> to preserve the value across restarts.</dd>
+
+        <dt>Recipients <span class="required">required</span></dt>
+        <dd>User ID to which the control panel with buttons is sent.</dd>
+        <dd>Authorization token for connecting to the MAX bot. Passed in the <code>Authorization</code> header.</dd>
+    </dl>
+
+    <h3>Behavior</h3>
+    <p>On start, the node establishes WSS connections with the MAX server. After connecting:</p>
+    <ul>
+        <li>Sends the main button panel (from <code>max-control</code> nodes) to all recipients</li>
+        <li>Maintains the connection with pings every 25 seconds</li>
+        <li>Refreshes the panel by timer (if interval > 0)</li>
+        <li>Automatically reconnects after 5 seconds if the connection is lost</li>
+    </ul>
+    <p>Buttons in the panel are arranged automatically: 3 per row if there are fewer than 10 buttons, and 4 per row if there are 10 or more.</p>
+
+    <h3>Credentials</h3>
+    <p>The token is stored in Node-RED credentials and is not visible in the flow.</p>
+</script>

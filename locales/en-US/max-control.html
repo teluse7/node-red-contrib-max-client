@@ -1,0 +1,42 @@
+<script type="text/html" data-help-name="max-control">
+    <p>MAX control button node.</p>
+    <p>Creates a button in the MAX control panel. When the button is clicked in MAX, the node sends a message to the output port.</p>
+
+    <h3>Settings</h3>
+    <dl class="message-properties">
+        <dt>Name</dt>
+        <dd>The node name displayed in the Node‑RED editor. If not specified, the button text or “max-control” is used.</dd>
+
+        <dt>Panel <span class="required">required</span></dt>
+        <dd>Reference to the <code>max-panel</code> node (control panel in MAX). This field must be selected; saving is not possible without it.</dd>
+
+        <dt>Button <span class="required">required</span></dt>
+        <dd>Text displayed on the button in the MAX control panel. This is the text visible to the user.</dd>
+
+        <dt>Action <span class="required">required</span></dt>
+        <dd>Unique action identifier. <b>Must be unique</b> among all <code>max-control</code> nodes. When the button is clicked, MAX sends an event with this identifier, and the node matches it to the corresponding button.</dd>
+    </dl>
+
+    <h3>Output</h3>
+    <dl class="message-properties">
+        <dt>payload.user</dt>
+        <dd>Identifier of the user who clicked the button.</dd>
+
+        <dt>payload.action</dt>
+        <dd>Action value — the value specified in the “Action” field.</dd>
+
+        <dt>payload.button</dt>
+        <dd>Button text as specified in the settings.</dd>
+
+        <dt>raw</dt>
+        <dd>Full event object received from MAX via WebSocket.</dd>
+    </dl>
+
+    <h3>Statuses</h3>
+    <ul>
+        <li><b>Yellow ring</b> — initializing</li>
+        <li><b>Green dot</b> — connected to MAX</li>
+        <li><b>Red ring</b> — disconnected from MAX</li>
+        <li><b>Blue dot</b> — last action</li>
+    </ul>
+</script>

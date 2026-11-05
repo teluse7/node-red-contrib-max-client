@@ -1,10 +1,51 @@
 <script type="text/x-red" data-help-name="max-send">
-    <p>Node for sending notifications via a MAX-bot</p>
+    <p>Node for sending messages and screenshots via a MAX-bot.</p>
 
-    <p>Sends a message from `msg.payload` to the messenger MAX at the `ID` number with the `Token` access key via the MAX-bot at the `URL` address.</p>
-    <p>If the message contains web links, then if the `Render` checkbox is checked, screenshots of the specified pages will be sent to the messenger.</p>
-    <p>Some pages, especially those included with Dashboard 2.0 for Node-RED, require additional loading control (Canvas control). To do this, check the `Control` checkbox.</p>
+    <h3>Overview</h3>
+    <p>Sends a message from <b>msg.payload</b> or <b>msg.payload.text</b> to the MAX messenger. When the option is enabled, it takes screenshots of web pages and attaches them to the message.</p>
 
-    <p>For the ArmV7 platform, you need to install the external `teluse7/puppeteer-armv7` service in the container and specify its address and port in the `Service` field.</p>
-    <p>When setting up the container, specify internal port 3000 and the TZ variable (default: Europe/Moscow), and set the RAM limit to 2,560,000,000 and the CPU limit to 30.</p>
+    <h3>Settings</h3>
+    <dl class="message-properties">
+        <dt>Name</dt>
+        <dd>Node name displayed in the Node-RED editor. If not specified, "max-send" is used.</dd>
+
+        <dt>Connection <span class="required">required</span></dt>
+        <dd>Reference to a <code>max-ws-config</code> node (MAX connection settings). Saving is not possible unless this node is selected.</dd>
+
+        <dt>Take screenshots</dt>
+        <dd>If enabled, the node will try to take screenshots of pages referenced by links in the message. Requires access to a screenshot service or a local Puppeteer instance.</dd>
+
+        <dt>Wait for rendering to complete</dt>
+        <dd>Enables waiting for the page to be fully rendered before taking a screenshot. Useful for Dashboard 2.0 panels and dynamic charts.</dd>
+
+        <dt>Service</dt>
+        <dd>Address of an external service (e.g., <em>teluse7/puppeteer-armv7</em>) used for remote rendering. Leave empty if the screenshot is taken locally in the Node-RED container.</dd>
+    </dl>
+
+    <h3>Input</h3>
+    <dl class="message-properties">
+        <dt>msg.payload</dt>
+        <dd>Message text to be sent to MAX. If the message contains links and the <em>Take screenshots</em> option is enabled, screenshots will be generated.</dd> 
+        <dd>If <b>msg.payload.user</b> is set, the message text must be placed in <b>msg.payload.text</b>.</dd>
+
+        <dt>msg.payload.user (optional)</dt>
+        <dd>User ID (when the message should be sent to a specific recipient only). If the field is missing, the message is sent to all users from the connection.</dd>
+    </dl>
+
+    <h3>Statuses</h3>
+    <ul>
+        <li><b>Yellow ring</b> — the node is initializing.</li>
+        <li><b>Green dot</b> — the last message was sent successfully.</li>
+        <li><b>Red circle</b> — a send failure occurred.</li>
+    </ul>
+
+    <h3>Notes (for ArmV7)</h3>
+    <p>To work with screenshots on the ArmV7 platform, the external <em>teluse7/puppeteer-armv7</em> service must be installed in the container, and its address and port specified in the <b>Service</b> field.</p>
+    <p>When setting up the container, specify:</p>
+    <ul>
+        <li>Service internal port: <em>3000</em></li>
+        <li><b>TZ</b> environment variable: default is <em>Europe/Moscow</em></li>
+        <li><b>RAM</b> limit: <em>2560000000</em> bytes (2.5 GB) is recommended for stable Puppeteer operation on iHost</li>
+        <li><b>CPU</b> limit: <em>30</em> (percent) is recommended to prevent overloading the device during screenshot generation</li>
+    </ul>
 </script>

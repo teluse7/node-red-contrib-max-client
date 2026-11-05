@@ -1,0 +1,67 @@
+{
+    "max-ws-config": {
+        "label": {
+            "botUrl": "URL",
+            "refreshInterval": "Interval",
+            "midKey": "MID key",
+            "contextStore": "Context store",
+            "users": "Recipients",
+            "addUser": "Add user"
+        },
+        "placeholder": {
+            "botUrl": "MAX bot address",
+            "midKey": "Global variable for panel ID",
+            "token": "Token"
+        },
+        "tip": {
+            "botUrl": "<b>URL</b> — MAX server address without protocol. Example: bot.max.ru.<br>",
+            "refresh": "<b>Interval</b> — How often to refresh the panel. 0 means no refresh. Default is 28800 (8 hours).<br>",
+            "midKey": "<b>MID key</b> — Unique key to store the MID. Must be unique for each connection.<br>",
+            "users": "<b>Recipients</b> — Add recipients in MAX (ID, token) who will receive the control panel and notifications." 
+        },
+        "validate": {
+            "botUrlEmpty": "MAX bot URL is not specified",
+            "midKeyEmpty": "MID key is not specified",
+            "midKeyDuplicateHint": "Duplicate: key is already used in",
+            "midKeyDuplicateError": "Duplicate MID key",
+            "usersEmpty": "Add at least one recipient",
+            "usersEmptyHint": "Add at least one recipient with ID and token", 
+            "checkFields": "Please check the highlighted fields."
+        },
+        "status": {
+            "connecting": "Connecting to",
+            "connected": "Connected",
+            "reconnecting": "Reconnecting in"
+        },
+        "log": {
+            "invalidInterval": "Invalid refresh interval, default set: 8 hours",     
+            "parseUsersError": "max-ws-config: failed to parse users: ",
+            "listenerError": "Listener error: ",
+            "defaultPanelNotFound": "Default panel not found: ",
+            "sendPanelUserError": "Failed to send panel to user ",
+            "userNotFound": "User not found: ",
+            "sendPanelAllError": "Failed to send panel to all: ",
+            "deleteMidError": "Failed to delete old MID: ",
+            "noButtons": "max-ws-config: no buttons for active panel '",
+            "noButtonsUser": "', skip sending to ",
+            "noButtonsSkip": " ",
+            "panelError": "Panel error: ",
+            "refreshError": "Panel refresh error: ",
+            "startSendError": "Error sending panels on start: ",
+            "deployRestart": "Deploy in progress, restarting timer...", 
+            "timerRestarted": "Timer restarted, interval: ",
+            "timerRestartedValue": " seconds",
+            "alreadyConnected": "Connection already active for user ",
+            "parseJSONerror": "JSON parse error: ",
+            "arrayItemError": "Error processing array item: ",
+            "objectError": "Error processing object: ",
+            "invalidFormat": "Invalid data format",
+            "criticalError": "Critical error processing message: ",
+            "invalidEvent": "Invalid event",
+            "serverShutdown": "Server shutdown: ",
+            "wsError": "WebSocket error: ",
+            "statusListenerError": "Status listener error: ",
+            "noPanels": "max-ws-config: No panels, No connect"
+        }
+    }
+}

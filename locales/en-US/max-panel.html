@@ -1,0 +1,28 @@
+<script type="text/html" data-help-name="max-panel"> 
+    <p>MAX panel configuration node.</p>
+    <p>Each connection can have multiple panels, but only one is active at any given time.</p> 
+ 
+    <h3>Settings</h3> 
+    <dl class="message-properties"> 
+        <dt>Name</dt> 
+        <dd>The node name displayed in the Node‑RED editor. If not specified, the panel title is used.</dd> 
+ 
+        <dt>Connection <span class="required">required</span></dt> 
+        <dd>Reference to the <code>max-ws-config</code> node (WebSocket connection). This field must be selected; saving is not possible without it.</dd> 
+ 
+        <dt>Title <span class="required">required</span></dt> 
+        <dd>Text displayed in the MAX panel header. This is the text visible to the user.</dd> 
+ 
+        <dt>Default main panel <span class="required">required</span></dt> 
+        <dd>Checkbox to set this panel as the main one on startup and refresh. <b>Must be unique</b> among all <code>max-panel</code> nodes for the selected connection.</dd> 
+    </dl> 
+ 
+    <h3>Behavior</h3> 
+    <p>On start, the node specified in <b>Connection</b> establishes WSS connections with the MAX server. After connecting:</p> 
+    <ul> 
+        <li>Sends the main panel with buttons to all recipients of the specified <code>max-ws-config</code> connection</li> 
+        <li>Refreshes the panel to the main one by timer (if the interval > 0)</li> 
+        <li>Switches the current panel to the selected one using the <code>max-switch</code> node</li> 
+    </ul> 
+    <p>Buttons in the panel are arranged automatically: 3 per row if there are fewer than 10 buttons, and 4 per row if there are 10 or more.</p> 
+</script>

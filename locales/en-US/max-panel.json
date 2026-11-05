@@ -1,0 +1,29 @@
+{
+    "max-panel": {
+        "label": {
+            "name": "Name",
+            "config": "Connection",
+            "panelName": "Title",
+            "isActiveByDefault": "Default main panel"
+        },
+        "placeholder": {
+            "name": "Panel name in the list",
+            "panelName": "Panel title in MAX"
+        },
+        "tip": {
+            "isActiveByDefault": "This panel will become active on connect or refresh.",
+            "config": "<b>Connection</b> — The MAX bot connection to which the panel will be sent.<br>",
+            "panel": "<b>Title</b> — The panel header text that will be displayed in MAX."
+        },
+        "validate": {
+            "configNotSelected": "Select a MAX connection",
+            "configNotSelectedHint": "Select a MAX connection",
+            "panelNameEmpty": "Panel title is not specified",
+            "panelNameEmptyHint": "Panel title cannot be empty",
+            "duplicatePanelName": "Panel title is already in use",
+            "duplicatePanelNameHint": "Duplicate: panel title is already used in",
+            "activeConflict": "A default main panel is already assigned in",
+            "checkFields": "Please check the highlighted fields."
+        }
+    }
+}

@@ -1,0 +1,43 @@
+{
+    "max-control": {
+        "label": {
+            "name": "Name",
+            "targetPanel": "Panel",
+            "buttonText": "Button",
+            "buttonPayload": "Action"
+        },
+        "placeholder": {
+            "name": "Node name",
+            "buttonText": "Button text",
+            "buttonPayload": "Action name (callback)"
+        },
+        "validate": {
+            "targetPanelEmpty": "Panel is required",
+            "targetPanelEmptyHint": "Select a panel",
+            "buttonTextEmpty": "Button text is not specified",
+            "buttonTextEmptyHint": "Button text cannot be empty",
+            "buttonPayloadEmpty": "Action is not specified",
+            "buttonPayloadEmptyHint": "Action cannot be empty",
+            "buttonPayloadDuplicateError": "Action already used in another button",
+            "buttonPayloadDuplicateHint": "Duplicate: action already used in",
+            "checkFields": "Please check the highlighted fields."
+        },
+        "tip": {
+            "targetPanel": "<b>Panel</b> — The panel in MAX where the button will be added.<br>",
+            "buttonText": "<b>Button</b> — Text displayed on the button in the panel.<br>",
+            "buttonPayload": "<b>Action</b> — Unique action identifier.<br><b>Must be unique</b> among all max-control nodes.<br>When button is pressed, this value comes in msg.payload."
+        },
+        "status": {
+            "connected": "Connected",
+            "partial": "Partial ",
+            "panelSent": "Panel sent",
+            "disconnected": "Disconnected",
+            "callbackUser": "Callback to ",
+            "callback": "Callback"
+        },
+        "error": {
+            "panelNotFound": "max-control: panel not found",
+            "configNotFound": "max-control: config not found"
+        }
+    }
+}
