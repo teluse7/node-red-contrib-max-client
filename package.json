@@ -11,6 +11,11 @@
     "scripts": {
         "test": "echo \"без тестов\" && exit 0"
     },
+    "devDependencies": {
+        "mocha": "^10.4.0",
+        "node-red-node-test-helper": "^0.3.4",
+        "ws": "^8.16.0"
+    },
     "keywords": [
         "node-red",
         "MAX",
