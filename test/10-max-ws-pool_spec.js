@@ -12,7 +12,8 @@ describe('10. max-ws-pool (юнит, с подменённым ws)', function ()
         FakeWS.reset();
         delete require.cache[POOL];
         pool = require(POOL);
-        restore()
+        restore();
+        Module._load = orig
     });
 
     it('одинаковые url+token переиспользуют одно соединение', function () {
