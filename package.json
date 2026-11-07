@@ -9,7 +9,7 @@
     },
     "author": "teluse7",
     "scripts": {
-        "test": "echo \"без тестов\" && exit 0"
+        "test": "mocha --timeout 20000 --exit \"test/**/*_spec.js\""
     },
     "devDependencies": {
         "mocha": "^10.4.0",
