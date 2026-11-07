@@ -68,19 +68,21 @@ function until(fn, ms = 10000, what = 'условие') {
 
 describe('20. max-ws-config: соединение, панели, события', function () {
     let mock;
-    before(async function () { 
-        console.log('[test] Запуск мок-сервера');
-        mock = new MockMax(18081);
+    before(async function () {
+        // 1) Смотрим, что осталось в кэше после 10-го теста
+        const Pool = require('../max-ws-pool.js'); // достанет из кэша, если пул там лежит
+        const FakeWS = require('./helpers/fake-ws');
+        console.log('[diag] пул держит фейк?',
+            Pool.RealWebSocket === FakeWS ? 'ДА — утечка' : 'нет, чисто');
+        // если у пула свойство называется иначе — сравните то, что реально в нём хранится
+
+        // 2) Выкидываем пул из кэша в любом случае: следующий require соберёт его
+        //    уже с настоящим ws
+        delete require.cache[require.resolve('../max-ws-pool.js')];
+
+        // 3) Мок
+        mock = new MockMax(PORT);
         await mock.start();
-        console.log('[test] Мок-сервер запущен');
-        
-        console.log('[test] Создание конфигурации');
-        node = await createNode({
-            url: 'wss://127.0.0.1:18081/ws/updates',
-            token: 'TOK-A'
-        });
-        //mock = new MockMax(PORT); 
-        //await mock.start() 
     });
     after(async function () { await mock.stop() });
     beforeEach(function () { 
