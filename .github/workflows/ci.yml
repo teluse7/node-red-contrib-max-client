@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,6 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
 
       - name: Test
         run: npm test
