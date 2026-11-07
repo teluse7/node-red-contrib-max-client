@@ -2,6 +2,7 @@
 const assert = require('assert');
 const path = require('path');
 const helper = require('node-red-node-test-helper');
+helper.init(require.resolve('node-red'));
 const { install: installPuppeteerStub } = require('./helpers/stub-puppeteer');
 const { installFetch, jsonRes, bytesRes } = require('./helpers/patch-fetch');
 
