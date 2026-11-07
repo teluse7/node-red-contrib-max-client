@@ -8,6 +8,7 @@ let pool;
 
 describe('10. max-ws-pool (юнит, с подменённым ws)', function () {
     before(function () {
+        const Module = require('module'); 
         const restore = patchModule('ws', FakeWS);
         FakeWS.reset();
         delete require.cache[POOL];
