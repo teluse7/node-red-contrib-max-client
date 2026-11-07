@@ -15,6 +15,7 @@ class MockMax {
     }
 
     start() {
+        console.log('[mock] Запуск сервера');
         const certDir = path.join(__dirname, '..', 'certs');
         const key = fs.readFileSync(path.join(certDir, 'key.pem'));
         const cert = fs.readFileSync(path.join(certDir, 'cert.pem'));
