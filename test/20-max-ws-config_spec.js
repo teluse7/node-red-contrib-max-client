@@ -69,8 +69,18 @@ function until(fn, ms = 10000, what = 'условие') {
 describe('20. max-ws-config: соединение, панели, события', function () {
     let mock;
     before(async function () { 
-        mock = new MockMax(PORT); 
-        await mock.start() 
+        console.log('[test] Запуск мок-сервера');
+        mock = new MockMax(18081);
+        await mock.start();
+        console.log('[test] Мок-сервер запущен');
+        
+        console.log('[test] Создание конфигурации');
+        node = await createNode({
+            url: 'wss://127.0.0.1:18081/ws/updates',
+            token: 'TOK-A'
+        });
+        //mock = new MockMax(PORT); 
+        //await mock.start() 
     });
     after(async function () { await mock.stop() });
     beforeEach(function () { 
