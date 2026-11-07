@@ -3,7 +3,7 @@ const assert = require('assert');
 const { patchModule } = require('./helpers/patch-require');
 const FakeWS = require('./helpers/fake-ws');
 
-const POOL = require.resolve('./max-ws-pool.js');
+const POOL = require.resolve('../max-ws-pool.js');
 let pool;
 
 describe('10. max-ws-pool (юнит, с подменённым ws)', function () {
