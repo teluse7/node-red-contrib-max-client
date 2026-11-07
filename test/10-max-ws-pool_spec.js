@@ -8,14 +8,12 @@ let pool;
 
 describe('10. max-ws-pool (юнит, с подменённым ws)', function () {
     before(function () {
-        const Module = require('module');
-        const orig = Module._load; 
         const restore = patchModule('ws', FakeWS);
         FakeWS.reset();
         delete require.cache[POOL];
         pool = require(POOL);
         restore();
-        Module._load = orig
+        delete require.cache[POOL]; // ← ключевая строка: не оставляем пул с фейком в кэше
     });
 
     it('одинаковые url+token переиспользуют одно соединение', function () {
