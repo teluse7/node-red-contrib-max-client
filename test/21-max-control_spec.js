@@ -1,4 +1,5 @@
 'use strict';
+const Module = require('module'); 
 Module._load = Module._load || function() {};  // сброс возможного хука
 delete require.cache[require.resolve('ws')];
 delete require.cache[require.resolve(`${NODES_DIR}/max-ws-pool.js`)];
