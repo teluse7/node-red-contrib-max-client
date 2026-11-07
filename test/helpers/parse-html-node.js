@@ -2,7 +2,7 @@
 
 function findRegisterTypeBlocks(src) {
     const blocks = [];
-    const re = /RED\.nodes\.registerType\s*["']([a-zA-Z0-9_-]+)["']\s*,/g;
+    const re = /RED[.]nodes[.]registerType[(][ ]*["']([a-zA-Z0-9_-]+)["'][ ]*[,]/g;
     let m;
     while ((m = re.exec(src))) {
         const start = m.index + m[0].length;
