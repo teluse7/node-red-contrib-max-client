@@ -5,7 +5,7 @@ const path = require('path');
 const { install: installPuppeteerStub } = require('./helpers/stub-puppeteer');
 const H = require('./helpers/parse-html-node');
 
-const NODES_DIR = path.join(__dirname, '..', 'nodes'); // поправьте, если узлы лежат не в nodes/
+const NODES_DIR = path.join(__dirname, '..'); // поправьте, если узлы лежат не в nodes/
 
 const NODES = [
     { type: 'max-ws-config', kind: 'config', icon: null, exceptions: ['contextStore'], credentials: ['maxUsers'] },
