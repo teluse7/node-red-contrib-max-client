@@ -5,7 +5,7 @@ const helper = require('node-red-node-test-helper');
 const MockMax = require('./helpers/mock-max');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-const NODES_DIR = path.join(__dirname, '..', 'nodes');
+const NODES_DIR = path.join(__dirname, '..');
 function fresh(file) {
     delete require.cache[require.resolve(`${NODES_DIR}/${file}`)];
     return require(`${NODES_DIR}/${file}`)
