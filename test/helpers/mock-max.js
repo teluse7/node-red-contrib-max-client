@@ -20,21 +20,42 @@ class MockMax {
         const cert = fs.readFileSync(path.join(certDir, 'cert.pem'));
         return new Promise(resolve => {
             this.server = https.createServer({ key, cert }, (req, res) => this._handleHttp(req, res));
+
+            // ——— ДИАГНОСТИКА: сюда попадают все отказы на уровне TLS и сокета ———
+            this.server.on('tlsClientError', (err, tlsSocket) => {
+                console.error('[mock-max] tlsClientError:', err.message)
+            });
+            this.server.on('clientError', (err, socket) => {
+                console.error('[mock-max] clientError:', err.message)
+            });
+            this.server.on('error', (err) => {
+                console.error('[mock-max] server error:', err.message)
+            });
+
             this.wss = new WebSocketServer({ server: this.server });
+            this.wss.on('error', (err) => console.error('[mock-max] wss error:', err.message));
+
             this.wss.on('connection', (ws, req) => {
                 const token = req.headers.authorization;
+                console.log('[mock-max] WS connected:', req.url, '| Authorization:', token);
                 this.connections.push({ token, ws });
                 if (this.rejectTokens.includes(token)) { try { ws.close() } catch (e) {} return }
                 ws.on('message', data => this.messages.push({ token, data: data.toString() }))
             });
-            this.server.listen(this.port, '127.0.0.1', resolve)
+
+            this.server.listen(this.port, '127.0.0.1', () => {
+                console.log('[mock-max] listening on https://127.0.0.1:' + this.port);
+                resolve()
+            })
         })
     }
+
 
     _handleHttp(req, res) {
         let body = '';
         req.on('data', c => body += c);
         req.on('end', () => {
+            console.log('[mock-max] HTTP:', req.method, req.url);
             const u = new URL(req.url, 'https://mock.local');
             const rec = {
                 method: req.method,
