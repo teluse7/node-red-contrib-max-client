@@ -2,6 +2,7 @@
 const assert = require('assert');
 const path = require('path');
 const helper = require('node-red-node-test-helper');
+helper.init(require.resolve('node-red'));
 const MockMax = require('./helpers/mock-max');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // мок с самоподписанным сертификатом
