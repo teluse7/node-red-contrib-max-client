@@ -10,9 +10,9 @@ const NODES_DIR = path.join(__dirname, '..'); // поправьте, если у
 const NODES = [
     { type: 'max-ws-config', kind: 'config', icon: null, exceptions: ['contextStore'], credentials: ['maxUsers'] },
     { type: 'max-panel',     kind: 'config', icon: null, exceptions: [], credentials: [] },
-    { type: 'max-control',   kind: 'node',   icon: 'bridge.svg',    exceptions: [], credentials: [], io: { inputs: 0, outputs: 1 } },
-    { type: 'max-switch',    kind: 'node',   icon: 'switch.svg',    exceptions: [], credentials: [], io: { inputs: 1, outputs: 0 } },
-    { type: 'max-send',      kind: 'node',   icon: 'max-icon.png',  exceptions: [], credentials: [], io: { inputs: 1, outputs: 1 } },
+    { type: 'max-control',   kind: 'node',   icon: null,    exceptions: [], credentials: [], io: { inputs: 0, outputs: 1 } },
+    { type: 'max-switch',    kind: 'node',   icon: null,    exceptions: [], credentials: [], io: { inputs: 1, outputs: 0 } },
+    { type: 'max-send',      kind: 'node',   icon: 'icons/max-icon.png',  exceptions: [], credentials: [], io: { inputs: 1, outputs: 1 } },
 ];
 
 function stubRED(registrations) {
