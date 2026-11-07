@@ -1,4 +1,8 @@
 'use strict';
+Module._load = Module._load || function() {};  // сброс возможного хука
+delete require.cache[require.resolve('ws')];
+delete require.cache[require.resolve(`${NODES_DIR}/max-ws-pool.js`)];
+
 const assert = require('assert');
 const path = require('path');
 const helper = require('node-red-node-test-helper');
