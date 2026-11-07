@@ -15,6 +15,12 @@ function fresh(file) {
 // пул должен быть свежим и с реальным ws (в 10-спеке он грузился с фейком)
 delete require.cache[require.resolve(`${NODES_DIR}/max-ws-pool.js`)];
 
+// ДИАГНОСТИКА: какой ws сейчас в кэше
+const wsModule = require('ws');
+console.log('[diag] WebSocketServer:', typeof wsModule.WebSocketServer,
+    '| Server:', typeof wsModule.Server,
+    '| путь:', require.resolve('ws'));
+
 const wsConfigNode = fresh('max-ws-config.js');
 const panelNode = fresh('max-panel.js');
 const controlNode = fresh('max-control.js');
