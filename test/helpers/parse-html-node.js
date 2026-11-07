@@ -95,7 +95,7 @@ function extractTemplate(src, templateName) {
 
 function extractInputIds(tpl) {
     const ids = [];
-    const re = /id="node-(?:input|config)-input-([a-zA-Z0-9_]+)"/g;
+    const re = /id="node-(?:config-)?input-([a-zA-Z0-9_]+)"/g;
     let m;
     while ((m = re.exec(tpl))) ids.push(m[1]);
     return [...new Set(ids)]
