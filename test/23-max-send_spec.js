@@ -5,7 +5,7 @@ const helper = require('node-red-node-test-helper');
 const { install: installPuppeteerStub } = require('./helpers/stub-puppeteer');
 const { installFetch, jsonRes, bytesRes } = require('./helpers/patch-fetch');
 
-const NODES_DIR = path.join(__dirname, '..', 'nodes');
+const NODES_DIR = path.join(__dirname, '..');
 function fresh(file) {
     delete require.cache[require.resolve(`${NODES_DIR}/${file}`)];
     return require(`${NODES_DIR}/${file}`)
