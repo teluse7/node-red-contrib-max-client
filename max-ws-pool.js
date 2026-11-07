@@ -96,7 +96,10 @@ class PooledWebSocket {
                 poolConnections.delete(key)
             });
 
-            realWs.on('error', (err) => {})
+            realWs.on('error', (err) => {
+                console.error('[ws-pool] WS error:', err.message);
+                conn.subscribers.slice().forEach(w => w._emit('error', err))
+            })
         } 
 
         // Create wrapper, add subscribers
