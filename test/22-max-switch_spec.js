@@ -2,7 +2,7 @@
 const Module = require('module'); 
 Module._load = Module._load || function() {};  // сброс возможного хука
 delete require.cache[require.resolve('ws')];
-delete require.cache[require.resolve(`${NODES_DIR}/max-ws-pool.js`)];
+delete require.cache[require.resolve('../max-ws-pool.js')];
 
 const assert = require('assert');
 const path = require('path');
@@ -16,7 +16,7 @@ function fresh(file) {
     delete require.cache[require.resolve(`${NODES_DIR}/${file}`)];
     return require(`${NODES_DIR}/${file}`)
 }
-delete require.cache[require.resolve(`${NODES_DIR}/max-ws-pool.js`)];
+delete require.cache[require.resolve('../max-ws-pool.js')];
 
 const wsConfigNode = fresh('max-ws-config.js');
 const panelNode = fresh('max-panel.js');
