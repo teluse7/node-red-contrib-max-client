@@ -15,18 +15,24 @@ describe('02. package.json', function () {
     });
 
     it('в node-red.nodes перечислены существующие файлы', function () {
-        assert.ok(pkg['node-red'] && Array.isArray(pkg['node-red'].nodes), 'нет секции node-red.nodes');
-        for (const rel of pkg['node-red'].nodes) {
-            assert.ok(fs.existsSync(path.join(ROOT, rel)), `файл "${rel}" из node-red.nodes не найден`)
+        const nodes = pkg['node-red']?.nodes;
+        assert.ok(nodes && typeof nodes === 'object', 'нет секции node-red.nodes');
+    
+        for (const filePath of Object.values(nodes)) {
+            assert.ok(fs.existsSync(path.join(ROOT, filePath)), 
+                `файл "${filePath}" из node-red.nodes не найден`)
         }
     });
 
     it('все .js файлы узлов перечислены в node-red.nodes', function () {
-        const listed = (pkg['node-red'].nodes || []).join(' ');
-        for (const t of TYPES) {
-            assert.ok(listed.includes(t + '.js'), `файл узла ${t}.js не перечислен в node-red.nodes`)
+        const listedFiles = new Set(Object.values(pkg['node-red'].nodes));
+    
+        for (const type of TYPES) {
+            const expectedFile = `${type}.js`;
+            assert.ok(listedFiles.has(expectedFile), 
+                `файл узла ${expectedFile} не перечислен в node-red.nodes`)
         }
-    });
+    });    
 
     it('ws и puppeteer указаны в dependencies (не только devDependencies)', function () {
         const deps = pkg.dependencies || {};
