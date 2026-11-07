@@ -10,7 +10,7 @@ function findRegisterTypeBlocks(src) {
         for (i = start; i < src.length; i++) {
             const ch = src[i];
             if (inStr) { 
-                if (ch === inStr && src[i - 1] !== '\') inStr = null; 
+                if (ch === inStr && src[i - 1] !== '\\') inStr = null; 
                 continue 
             }
             if (ch === '"' || ch === "'") inStr = ch
@@ -33,7 +33,7 @@ function extractObjectBlock(body, key) {
     for (let i = open; i < body.length; i++) {
         const ch = body[i];
         if (inStr) { 
-            if (ch === inStr && body[i - 1] !== '\') inStr = null; 
+            if (ch === inStr && body[i - 1] !== '\\') inStr = null; 
             continue
         }
         if (ch === '"' || ch === "'") inStr = ch
@@ -56,7 +56,7 @@ function topLevelKeys(objSrc) {
     for (let i = 0; i < objSrc.length; i++) {
         const ch = objSrc[i];
         if (inStr) { 
-            if (ch === inStr && objSrc[i - 1] !== '\') inStr = null; 
+            if (ch === inStr && objSrc[i - 1] !== '\\') inStr = null; 
             continue
         }
         if (ch === '"' || ch === "'") { 
