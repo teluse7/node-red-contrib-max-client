@@ -115,7 +115,7 @@ describe('23. max-send: отправка и скриншоты', function () {
                 assert.ok('TOK-A' === p.options.headers.Authorization || 'TOK-B' === p.options.headers.Authorization);
                 assert.strictEqual(p.options.headers['Content-Type'], 'application/json')
             }
-            await waitLastStatus(st, s => s.fill === 'green', 5000)
+            await until(() => st.some(s => s.fill === 'green'), 5000, 'зелёный статус узла')
         } finally { f.restore() }
     });
 
@@ -233,7 +233,7 @@ describe('23. max-send: отправка и скриншоты', function () {
         try {
             const st = captureStatuses(helper.getNode('s1'));
             helper.getNode('s1').receive({ payload: 'привет' });
-            await waitLastStatus(st, s => s.fill === 'red' && String(s.text).includes('401'), 8000)
+            await until(() => st.some(s => s.fill === 'red' && String(s.text).includes('401')), 8000, 'красный статус с 401')
         } finally { f.restore() }
     })
 });
