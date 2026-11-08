@@ -218,7 +218,12 @@ describe('20. max-ws-config: соединение, панели, события'
     it('переключение панели: старое сообщение удаляется, новое отправляется', async function () {
         const { flow, creds } = makeFlow({ controls: makeControls(1) });
         await load(flow, creds);
-        const first = await mock.waitForHttp(r => r.method === 'POST' && r.path === '/messages');
+        await mock.waitForConnection('TOK-A');
+        const first = await mock.waitForHttp(r => r.method === 'POST' && r.path === '/messages'
+            && r.body.includes('Главная'));
+        // ждём, пока узел обработает ответ мока и реально сохранит mid —
+        // иначе switchPanel не увидит старый мид и DELETE не отправится
+        await until(() => helper.getNode('c1').getMid('12345'), 5000, 'сохранение mid после стартовой отправки');
         helper.getNode('c1').switchPanel('Освещение');
         await mock.waitForHttp(r => r.method === 'DELETE' && r.query.message_id === first.resMid);
         await mock.waitForHttp(r => r.method === 'POST' && r.path === '/messages' && JSON.parse(r.body).text === 'Освещение')
