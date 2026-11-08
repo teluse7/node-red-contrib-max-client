@@ -45,6 +45,8 @@ function makeFlow({ controls = [], interval = 0, users = USERS, botUrl = `127.0.
         { id: 'p2', type: 'max-panel', config: 'c1', panelName: 'Освещение' },
         ...controls.map((c, i) => ({ id: `ctl${i}`, type: 'max-control', targetPanel: 'p1', buttonText: c.text, buttonPayload: c.payload, wires: [[`out${i}`]] })),
         ...controls.map((_, i) => ({ id: `out${i}`, type: 'helper' })),
+        { id: 'ctlP2', type: 'max-control', targetPanel: 'p2', buttonText: 'Кнопка света', buttonPayload: 'act_light', wires: [['outP2']] },
+        { id: 'outP2', type: 'helper' }
     ];
     return { flow, creds: { c1: { maxUsers: JSON.stringify(users) } } }
 }
