@@ -245,8 +245,7 @@ module.exports = function (RED) {
 
             setTimeout(() => {
                 if (!shouldReconnect || isClosed) return;
-                console.log('[cfg] попытка подключения:', node.wsUrl);
-
+                
                 conn.wasOpen = false;
 
                 try {
@@ -270,12 +269,10 @@ module.exports = function (RED) {
                     }); 
                     
                     ws.on("error", (err) => {
-                        console.error('[cfg] WS error:', err.message);   // ← ключевая строка, видна в CI
                         node.error(RED._("max-ws-config.log.wsError") + " " + err.message);
                         if (!conn.wasOpen) ensureConnected(conn, attempt + 1)
                     })
                 } catch (e) {
-                    console.error('[cfg] sync error:', e.message);
                     node.error(RED._("max-ws-config.log.wsError") + " " + e.message);
                     ensureConnected(conn, attempt + 1)
                 } 
@@ -343,8 +340,7 @@ module.exports = function (RED) {
         // ── WebSocket connect ──
         node.connectUser = (user) => {
             if (!node.botUrl || !user.userId || !user.token) return;
-            console.log('[cfg] connectUser:', user.userId, node.wsUrl);
-
+            
             let conn;
             node.connections.set(user.userId, conn = node.connections.get(user.userId) ?? { user, ws: null });
 
@@ -421,8 +417,6 @@ module.exports = function (RED) {
                 try { listener.onMaxStatus(aggregated) }
                 catch (e) { node.error(RED._("max-ws-config.log.statusListenerError") + " " + e.message) }
         }
-
-        console.log('[cfg] panels=' + node.panels.length, 'users=' + node.users.length, 'wsUrl=' + node.wsUrl);
 
         if (node.panels.length === 0) 
             node.warn(RED._("max-ws-config.log.noPanels"))
