@@ -84,6 +84,12 @@ describe('20. max-ws-config: соединение, панели, события'
         mock = new MockMax(PORT);
         await mock.start();
 
+        const origFetch = global.fetch;
+        global.fetch = (...args) => {
+            console.log('[diag] fetch →', String(args[0]));
+            return origFetch(...args)
+        };
+        
         // САМОПРОВЕРКА: достаёт ли TLS-цепочка мока из этого процесса
         try {
             const res = await fetch(`https://127.0.0.1:${PORT}/diag-ping`);
