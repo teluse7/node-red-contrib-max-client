@@ -83,6 +83,15 @@ describe('20. max-ws-config: соединение, панели, события'
         // 3) Мок
         mock = new MockMax(PORT);
         await mock.start();
+
+        // САМОПРОВЕРКА: достаёт ли TLS-цепочка мока из этого процесса
+        try {
+            const res = await fetch(`https://127.0.0.1:${PORT}/diag-ping`);
+            console.log('[diag] self-fetch OK:', res.status)
+        } catch (e) {
+            console.error('[diag] self-fetch FAIL:', e.message,
+                e.cause ? '| причина: ' + e.cause.message : '')
+        }
     });
     after(async function () { await mock.stop() });
     beforeEach(function () { 
