@@ -72,6 +72,7 @@ module.exports = function (RED) {
                 const url = new URL(node.apiUrl);
                 const options = {
                     hostname: url.hostname,
+                    port: url.port || 443,
                     path: url.pathname,
                     method: method,
                     headers: {
