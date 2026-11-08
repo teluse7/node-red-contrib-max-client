@@ -97,7 +97,6 @@ class PooledWebSocket {
             });
 
             realWs.on('error', (err) => {
-                console.error('[ws-pool] WS error:', err.message);
                 conn.subscribers.slice().forEach(w => w._emit('error', err))
             })
         } 
