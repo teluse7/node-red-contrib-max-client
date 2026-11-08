@@ -53,6 +53,7 @@ class MockMax {
 
 
     _handleHttp(req, res) {
+        console.log('[mock-max] HTTP:', req.method, req.url);
         let body = '';
         req.on('data', c => body += c);
         req.on('end', () => {
