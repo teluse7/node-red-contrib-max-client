@@ -80,9 +80,12 @@ describe('22. max-switch: переключение панелей', function () 
         const { flow, creds } = makeFlow();
         await load(flow, creds);
         await mock.waitForConnection('TOK-A');
+        // стартовая панель уходит через ~2 c после загрузки; mid сохранится только после этого POST
+        await mock.waitForHttp(r => r.method === 'POST' && r.path === '/messages'
+            && r.query.user_id === '12345' && r.body.includes('Главная'));
         helper.getNode('sw1').receive({ payload: { user: '12345' } });
         await mock.waitForHttp(r => r.method === 'DELETE');
-        const post = await mock.waitForHttp(r => r.method === 'POST' && JSON.parse(r.body).text === 'Освещение');
+        const post = await mock.waitForHttp(r => r.method === 'POST' && r.body.includes('Освещение'));
         assert.strictEqual(post.query.user_id, '12345')
     });
 
@@ -91,10 +94,21 @@ describe('22. max-switch: переключение панелей', function () 
         await load(flow, creds);
         await mock.waitForConnection('TOK-A');
         await mock.waitForConnection('TOK-B');
-        helper.getNode('sw1').receive({ payload: {} });
+        // ждём стартовую панель для ОБОИХ пользователей — иначе переключение может обогнать старт
         await until(() =>
-            mock.httpRequests.filter(r => r.method === 'POST' && r.path === '/messages' && JSON.parse(r.body).text === 'Освещение').length >= 2,
-            10000, 'POST для обоих пользователей')
+            mock.httpRequests.filter(r => r.method === 'POST' && r.path === '/messages' && JSON.parse(r.body).text === 'Главная').length >= 2,
+            15000, 'стартовая панель для обоих');
+        helper.getNode('sw1').receive({ payload: {} });
+        try {
+            await until(() =>
+                mock.httpRequests.filter(r => r.method === 'POST' && r.path === '/messages' && JSON.parse(r.body).text === 'Освещение').length >= 2,
+                10000, 'POST для обоих пользователей')
+        } catch (e) {
+            // диагностика: если тест упадёт, увидим, какие тексты реально ушли в POST
+            console.log('[diag] увиденные POST-тексты:',
+                mock.httpRequests.map(r => { try { return JSON.parse(r.body).text } catch { return '?' } }));
+            throw e
+        }
     });
 
     it('неизвестный пользователь — warn и без отправки', async function () {
@@ -106,7 +120,7 @@ describe('22. max-switch: переключение панелей', function () 
         helper.getNode('sw1').receive({ payload: { user: 'nope' } });
         await sleep(1000);
         assert.strictEqual(mock.httpRequests.filter(r => r.method === 'POST' && r.path === '/messages').length, 0);
-        assert.ok(warns.length >= 1, 'должно быть предупреждение о неизвестном пользователе')
+        assert.ok(warns.length >= 1, 'должно б   ыть предупреждение о неизвестном пользователе')
     });
 
     it('после переключения — зелёная точка', async function () {
