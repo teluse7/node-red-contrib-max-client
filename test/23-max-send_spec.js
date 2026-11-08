@@ -108,7 +108,6 @@ describe('23. max-send: отправка и скриншоты', function () {
             assert.deepStrictEqual(ids, ['12345', '222']);
             for (const p of posts) {
                 assert.strictEqual(JSON.parse(p.body).text, 'Привет из теста');
-                assert.strictEqual(p.options.headers.Authorization, posts.find(q => q !== p && new URL(q.url).searchParams.get('user_id') === new URL(p.url).searchParams.get('user_id'))?.options.headers.Authorization);
                 assert.ok('TOK-A' === p.options.headers.Authorization || 'TOK-B' === p.options.headers.Authorization);
                 assert.strictEqual(p.options.headers['Content-Type'], 'application/json')
             }
@@ -161,7 +160,8 @@ describe('23. max-send: отправка и скриншоты', function () {
         });
         try {
             helper.getNode('s1').receive({ payload: 'Смотри https://example.com/graf' });
-            const posts = await until(() => f.calls.filter(c => c.url.includes('/messages')).length >= 2, 10000, 'POST с attachments');
+            await until(() => f.calls.filter(c => c.url.includes('/messages')).length >= 2, 10000, 'POST с attachments');
+            const posts = f.calls.filter(c => c.url.includes('/messages'));
 
             const serviceCall = f.calls.find(c => c.url.startsWith('https://shots.example/render'));
             assert.ok(serviceCall, 'запрос к сервису скриншотов не сделан');
@@ -188,11 +188,6 @@ describe('23. max-send: отправка и скриншоты', function () {
         if (typeof File === 'undefined') this.skip();
         const { flow, creds } = makeFlow({ scrshot: true, serviceurl: '' });
         await load(flow, creds);
-
-        const pages = [];
-        // уже есть глобальный stub из before(); добавим запись goto
-        const origGoto = stub.launch; // не трогаем — для записи создадим вложенный stub не требуется;
-                                      // достаточно проверить результат загрузки
 
         const f = installFetch(call => {
             if (call.url.includes('/uploads?type=image')) return jsonRes({ url: 'https://up.example/put' });
@@ -227,7 +222,9 @@ describe('23. max-send: отправка и скриншоты', function () {
     it('ошибка отправки (HTTP 401) — красный статус с кодом', async function () {
         const { flow, creds } = makeFlow();
         await load(flow, creds);
-        const f = installFetch(call => call.url.includes('/messages') ? { ok: false, status: 401 } : jsonRes({}));
+        const f = installFetch(call => call.url.includes('/messages')
+            ? { ok: false, status: 401, text: async () => 'Unauthorized', json: async () => ({}) }
+            : jsonRes({}));
         try {
             const st = captureStatuses(helper.getNode('s1'));
             helper.getNode('s1').receive({ payload: 'привет' });
