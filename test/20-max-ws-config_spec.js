@@ -129,7 +129,7 @@ describe('20. max-ws-config: соединение, панели, события'
         assert.strictEqual(msg.payload.button, 'Кнопка 1');
         assert.strictEqual(msg.payload.user, '12345');
         assert.strictEqual(msg.topic, 'act_1');
-        assert.deepStrictEqual(msg.raw, event)
+        assert.deepStrictEqual(msg.raw, { ...event, user: '12345' })
     });
 
     it('событие с чужим payload не доходит ни до кого', async function () {
