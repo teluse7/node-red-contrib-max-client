@@ -30,10 +30,14 @@ function until(fn, ms = 10000, what = 'условие') {
     })
 }
 
-function captureStatuses(node) {
+function captureStatuses(node, label = '?') {
     const statuses = [];
     const orig = node.status.bind(node);
-    node.status = s => { statuses.push(s); orig(s) }
+    node.status = s => {
+        statuses.push(s);
+        console.log(`[diag] status (${label}):`, JSON.stringify(s));
+        orig(s)
+    }
     return statuses
 }
 const lastStatus = st => st[st.length - 1];
@@ -197,7 +201,8 @@ describe('23. max-send: отправка и скриншоты', function () {
         });
         try {
             helper.getNode('s1').receive({ payload: 'страница https://example.com/page' });
-            const posts = await until(() => f.calls.filter(c => c.url.includes('/messages')).length >= 2, 10000, 'POST');
+            await until(() => f.calls.filter(c => c.url.includes('/messages')).length >= 2, 10000, 'POST');
+            const posts = f.calls.filter(c => c.url.includes('/messages'));
             for (const p of posts) {
                 const body = JSON.parse(p.body);
                 assert.deepStrictEqual(body.attachments[0].payload, { photos: ['local-shot'] })
