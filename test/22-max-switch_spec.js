@@ -88,6 +88,7 @@ describe('22. max-switch: переключение панелей', function () 
         // стартовая панель уходит через ~2 c после загрузки; mid сохранится только после этого POST
         await mock.waitForHttp(r => r.method === 'POST' && r.path === '/messages'
             && r.query.user_id === '12345' && r.body.includes('Главная'));
+        await until(() => helper.getNode('c1').getMid('12345'), 5000, 'сохранение mid');
         helper.getNode('sw1').receive({ payload: { user: '12345' } });
         await mock.waitForHttp(r => r.method === 'DELETE');
         const post = await mock.waitForHttp(r => r.method === 'POST' && r.body.includes('Освещение'));
