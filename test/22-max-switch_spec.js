@@ -21,6 +21,7 @@ delete require.cache[require.resolve('../max-ws-pool.js')];
 const wsConfigNode = fresh('max-ws-config.js');
 const panelNode = fresh('max-panel.js');
 const switchNode = fresh('max-switch.js');
+const controlNode = fresh('max-control.js');
 
 const PORT = 18281;
 const USERS = [{ userId: '12345', token: 'TOK-A' }, { userId: '222', token: 'TOK-B' }];
@@ -53,13 +54,17 @@ function makeFlow() {
         { id: 'c1', type: 'max-ws-config', botUrl: `127.0.0.1:${PORT}`, refreshInterval: 0, midKey: 'mk', contextStore: 'default' },
         { id: 'p1', type: 'max-panel', config: 'c1', panelName: 'Главная', isActiveByDefault: true },
         { id: 'p2', type: 'max-panel', config: 'c1', panelName: 'Освещение' },
-        { id: 'sw1', type: 'max-switch', targetPanel: 'p2', wires: [] },
+        { id: 'ctl1', type: 'max-control', targetPanel: 'p1', buttonText: 'Кнопка 1', buttonPayload: 'act_1', wires: [['o1']] },
+        { id: 'ctl2', type: 'max-control', targetPanel: 'p2', buttonText: 'Кнопка света', buttonPayload: 'act_light', wires: [['o2']] },
+        { id: 'o1', type: 'helper' },
+        { id: 'o2', type: 'helper' },
+        { id: 'sw1', type: 'max-switch', targetPanel: 'p2', wires: [] }
     ];
     return { flow, creds: { c1: { maxUsers: JSON.stringify(USERS) } } }
 }
 
 function load(flow, creds) {
-    return new Promise((res, rej) => helper.load([wsConfigNode, panelNode, switchNode], flow, creds, e => e ? rej(e) : res()))
+    return new Promise((res, rej) => helper.load([wsConfigNode, panelNode, switchNode, controlNode], flow, creds, e => e ? rej(e) : res()))
 }
 
 describe('22. max-switch: переключение панелей', function () {
@@ -115,12 +120,16 @@ describe('22. max-switch: переключение панелей', function () 
         const { flow, creds } = makeFlow();
         await load(flow, creds);
         await mock.waitForConnection('TOK-A');
+        // дожидаемся стартовой панели и сохранения mid, чтобы исключить гонку
+        await mock.waitForHttp(r => r.method === 'POST' && r.path === '/messages');
+        await until(() => helper.getNode('c1').getMid('12345'), 5000, 'сохранение mid');
         const warns = [];
-        helper.getNode('c1').warn = m => warns.push(m); // перехватываем warn конфига
+        helper.getNode('c1').warn = m => warns.push(m);
+        mock.httpRequests = [];          // чистая точка отсчёта
         helper.getNode('sw1').receive({ payload: { user: 'nope' } });
         await sleep(1000);
         assert.strictEqual(mock.httpRequests.filter(r => r.method === 'POST' && r.path === '/messages').length, 0);
-        assert.ok(warns.length >= 1, 'должно б   ыть предупреждение о неизвестном пользователе')
+        assert.ok(warns.length >= 1, 'должно быть предупреждение о неизвестном пользователе')
     });
 
     it('после переключения — зелёная точка', async function () {
